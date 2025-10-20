@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Giriş Yap — HocAlm</title>
+  <style>
+    :root{--border:#e5e7eb;--ok:#16a34a;--muted:#475569}
+    *{box-sizing:border-box} html,body{margin:0;padding:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+    .wrap{min-height:100vh;display:grid;place-items:center;background:linear-gradient(180deg,#fffdf5,#fff4d6)}
+    .card{width:min(420px,92%);background:#fff;border:1px solid var(--border);border-radius:16px;padding:20px;box-shadow:0 10px 20px rgba(0,0,0,.05)}
+    .card h1{margin:0 0 6px}
+    label{display:block;font-weight:700;margin-top:10px}
+    input{width:100%;padding:12px;border:1px solid var(--border);border-radius:12px;margin-top:6px}
+    .row{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:14px}
+    .btn{all:unset;display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border-radius:12px;font-weight:800;cursor:pointer}
+    .btn-primary{background:var(--ok);color:#fff}
+    .btn-ghost{border:2px dashed #94a3b8;color:#475569}
+    .muted{color:var(--muted);font-size:14px;margin-top:8px}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <form class="card" id="loginForm" novalidate>
+    <h1>Giriş Yap</h1>
+    <p class="muted">Deneme sürümünde şifre kontrolü yok; formu gönderince profil sayfasına yönlendireceğiz.</p>
+    <label for="email">E-posta</label>
+    <input id="email" type="email" placeholder="ornek@posta.com" required>
+    <label for="pwd">Şifre</label>
+    <input id="pwd" type="password" placeholder="••••••••" required>
+    <div class="row">
+      <a href="index.html" class="btn btn-ghost">← Ana Sayfa</a>
+      <button class="btn btn-primary" type="submit">Giriş</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  // Zaten girişliyse doğrudan profile yönlendir
+  if (localStorage.getItem('ch.auth') === '1') {
+    location.replace('profile.html');
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();  // Sayfa yenilenmesin
+
+    // Kullanıcı adı ve şifreyi al
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('pwd').value.trim();
+
+    // Demo giriş bilgisi
+    const demoEmail = 'demo@canimhocalm.com';
+    const demoPassword = 'demo123';
+
+    // Kullanıcıyı kontrol et
+    if (email === demoEmail && password === demoPassword) {
+      // Demo oturum işareti
+      localStorage.setItem('ch.userEmail', email);
+      localStorage.setItem('ch.auth', '1');
+
+      // Profil sayfasına git
+      location.replace('profile.html');
+    } else {
+      alert('Geçersiz kullanıcı adı veya şifre!');  // Hatalı giriş uyarısı
+    }
+  });
+</script>
+</body>
+</html>

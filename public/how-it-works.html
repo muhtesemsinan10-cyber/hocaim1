@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Nasıl Çalışır • HocAIm</title>
+
+  <!-- Font & Global CSS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="./style.css?v=5">
+
+  <!-- Sayfaya özel minik patch (grid, rozet, logo renklendirme, ikon boyutu) -->
+  <style>
+    :root{ --blue:#3b82f6; --ink:#0b1220; --muted:#475569; }
+    /* Logo renklendirme (mevcut navbar yapına uygun) */
+    .brand .hoc { color: var(--ink); font-weight: 800; }
+    .brand .aim { color: var(--blue); font-weight: 800; }
+
+    /* Üst başlık */
+    #how { padding: 48px 0; }
+    #how .title { text-align:center; margin:0 0 8px; }
+    #how .subtitle { text-align:center; margin:0 0 24px; color: var(--muted); }
+
+    /* Grid: 4 → 2 → 1 */
+    .how-steps{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(220px,1fr));
+      gap:24px; align-items:stretch;
+    }
+    @media (max-width:1100px){ .how-steps{ grid-template-columns:repeat(2, minmax(240px,1fr)); } }
+    @media (max-width:640px){ .how-steps{ grid-template-columns:1fr; } }
+
+    /* Kart, rozet ve hover */
+    .step{
+      position:relative; background:#fff; border:1px solid #e5e7eb; border-radius:18px;
+      box-shadow:0 10px 24px rgba(0,0,0,.06);
+      padding:40px 24px 24px; overflow:visible;
+      transition:transform .18s ease, box-shadow .18s ease;
+    }
+    .step:hover{ transform:translateY(-6px); box-shadow:0 16px 32px rgba(0,0,0,.10); }
+    .step .step-badge{
+      position:absolute; left:50%; top:0; transform:translate(-50%,-50%);
+      width:44px; height:44px; border-radius:999px; background:var(--blue); color:#fff;
+      font-weight:800; display:grid; place-items:center; border:4px solid #fff;
+      box-shadow:0 6px 16px rgba(59,130,246,.25);
+    }
+    .step h3{ text-align:center; margin:8px 0 10px; font-weight:800; color:#0b1220 }
+    .step p{ margin:6px auto 10px; max-width:48ch; color:#475569 }
+    .step ul{ margin:6px auto 0; padding-left:18px; max-width:50ch; list-style:disc }
+    .step li{ margin:6px 0 }
+
+    /* İkon boyut sabitleme (dosyasız inline SVG) */
+    .step .icon{
+      display:block; margin:6px auto 10px;
+      width:64px; height:64px; color:var(--blue); fill:var(--blue);
+    }
+
+    /* Mobile menu patch (mevcut nav yapın yoksa etkisiz kalır) */
+    .hamburger{display:none;border:0;background:transparent;font-size:1.6rem}
+    @media (max-width:920px){
+      .nav .links{ display:none; }
+      .hamburger{display:block}
+      .mobile-menu{display:none;padding:8px 0;border-top:1px solid #e5e7eb}
+      .mobile-open .mobile-menu{display:block}
+      .mobile-menu a{display:block;padding:12px 16px;color:#0b1220;text-decoration:none;border-radius:10px}
+      .mobile-menu a:hover{background:#f1f5f9}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR (mevcut CSS sınıflarına uygun: .navbar .nav .brand .links) -->
+  <header class="navbar">
+    <div class="container nav">
+      <a class="brand" href="index.html" aria-label="HocAIm anasayfa">
+        <span class="hoc">Hoc</span><span class="aim">AIm</span>
+      </a>
+
+      <nav class="links" aria-label="primary">
+        <a href="pricing.html">Planını Seç</a>
+        <a href="how-it-works.html" aria-current="page">Nasıl Çalışır</a>
+        <a class="btn btn-ghost" href="dashboard.html">Giriş Yap</a>
+        <a class="btn nav-main" href="index.html#cta">Ücretsiz Başla</a>
+      </nav>
+
+      <button class="hamburger" id="hamburger" aria-expanded="false" aria-controls="mobileMenu">☰</button>
+    </div>
+
+  </header>
+
+  <!-- SAYFA İÇERİĞİ -->
+  <main>
+   <section id="how" class="container" style="padding:48px 0">
+  <h1 class="title" style="text-align:center;margin:0 0 8px">Nasıl Çalışır</h1>
+  <p class="muted" style="text-align:center;margin:0 0 28px">
+    HocAIm seni tanır, planlar, anlatır ve ilerlemeni sürekli iyileştirir. İşte 4 basit adımda süreç:
+  </p>
+
+  <div class="hiw-2col">
+    <!-- 1 -->
+    <article class="hiw-card">
+      <div class="hiw-badge">1</div>
+      <div class="hiw-thumb">
+        <!-- hedef/target ikonu -->
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+          <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="2"/>
+          <circle cx="12" cy="12" r="1.8"/>
+        </svg>
+      </div>
+      <h3 class="hiw-title">Kısa Tanışma &amp; Hedef Belirleme</h3>
+      <p class="hiw-text">Önce seni tanıyoruz: hedefin, rutinlerin, gün içi uygun zamanların…</p>
+      <ul class="hiw-list">
+        <li><strong>Hedefler:</strong> YKS/LGS/KPSS, ders geçme, dil öğrenme vb.</li>
+        <li><strong>Rutin &amp; Zaman:</strong> Günlük ayırabileceğin süre, en verimli saatler.</li>
+        <li><strong>Engeller:</strong> Dikkat penceresi, dağıtan tetikleyiciler, zorlandığın konular.</li>
+      </ul>
+    </article>
+
+    <!-- 2 -->
+    <article class="hiw-card">
+      <div class="hiw-badge">2</div>
+      <div class="hiw-thumb">
+        <!-- beyin ikonu -->
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M8.5 7.5a3 3 0 1 1 3-3v15a3 3 0 1 1-3-3H7a3 3 0 1 1 0-6h1.5zM15.5 7.5a3 3 0 1 0-3-3v15a3 3 0 1 0 3-3H17a3 3 0 1 0 0-6h-1.5z" fill="currentColor"/>
+        </svg>
+      </div>
+      <h3 class="hiw-title">Mini Öğrenme Testi &amp; Profilin</h3>
+      <p class="hiw-text">5–7 soruluk kısa testle stilin ve çalışma eğilimlerin belirlenir.</p>
+      <ul class="hiw-list">
+        <li><strong>Baskın/ikincil stil:</strong> Anlatım buna göre uyarlar.</li>
+        <li><strong>Dikkat penceresi:</strong> Kişisel “pomodoro” (20–30 dk).</li>
+        <li><strong>Motivasyon tetikleyicileri:</strong> Kısa başarı döngüsü, görselleştirme.</li>
+      </ul>
+    </article>
+
+    <!-- 3 -->
+    <article class="hiw-card">
+      <div class="hiw-badge">3</div>
+      <div class="hiw-thumb">
+        <!-- clipboard/plan ikonu -->
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="5" y="5" width="14" height="16" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"/>
+          <rect x="9" y="3" width="6" height="4" rx="1" ry="1" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M8 11h8M8 15h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h3 class="hiw-title">Akıllı Günlük Plan &amp; Derse Başla</h3>
+      <p class="hiw-text">Profiline göre günlük plan hazırlanır; “Derse Başla” ile AI koç anlatımı ve hızı sana uyarlar.</p>
+      <ul class="hiw-list">
+        <li><strong>Uyarlanabilir anlatım:</strong> Şema/grafik, kısa metin, sesli özet.</li>
+        <li><strong>Bloklar:</strong> Pomodoro + mikro mola + hızlı tekrar.</li>
+        <li><strong>Esneklik:</strong> Yorgunsan blok/süre otomatik kısalır.</li>
+      </ul>
+    </article>
+
+    <!-- 4 -->
+    <article class="hiw-card">
+      <div class="hiw-badge">4</div>
+      <div class="hiw-thumb">
+        <!-- chart ikonu -->
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 19h16" stroke="currentColor" stroke-width="2"/>
+          <rect x="6" y="11" width="3" height="8" rx="1" fill="currentColor"/>
+          <rect x="11" y="7" width="3" height="12" rx="1" fill="currentColor"/>
+          <rect x="16" y="9" width="3" height="10" rx="1" fill="currentColor"/>
+        </svg>
+      </div>
+      <h3 class="hiw-title">İlerleme, Geri Bildirim &amp; Raporlar</h3>
+      <p class="hiw-text">Tamamladıkların kaydolur; zayıf noktalara egzersiz, güçlü alanlara pekiştirme önerileri gelir.</p>
+      <ul class="hiw-list">
+        <li><strong>Günlük/haftalık grafikler:</strong> Odak süresi, verimli saatler.</li>
+        <li><strong>Akıllı öneriler:</strong> “Cuma düşüşü var; molaları sıkla.”</li>
+        <li><strong>Rapor dışa aktar:</strong> PDF/CSV özetleri.</li>
+      </ul>
+    </article>
+  </div>
+</section>
+ke=
+  </main>
+
+  <footer class="container" style="color:#475569;font-size:.9rem;padding:24px 0">
+    © 2025 HocAIm — “Yapay zekâ anlatır; senin beynine göre anlatır.”
+  </footer>
+
+  <!-- Küçük JS: mobil menü + aktif link -->
+  <script>
+    const btn = document.getElementById('hamburger');
+    if (btn){
+      btn.addEventListener('click', ()=>{
+        const open = document.body.classList.toggle('mobile-open');
+        btn.setAttribute('aria-expanded', open ? 'true':'false');
+      });
+    }
+    (function markActive(){
+      const path = location.pathname.split('/').pop() || 'index.html';
+      document.querySelectorAll('nav a, .mobile-menu a').forEach(a=>{
+        if(a.getAttribute('href')===path){ a.style.background='#f1f5f9'; a.style.borderRadius='10px'; }
+      });
+    })();
+  </script>
+</body>
+</html>

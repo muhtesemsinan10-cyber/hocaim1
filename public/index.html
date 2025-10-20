@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<link rel="stylesheet" href="style.css">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>HocAlm — Kişisel Öğrenme Koçu</title>
+<meta name="description" content="HocAlm seni dinler, seni çözer, senin dilinde anlatır. Yapay zekâ destekli kişisel öğrenme koçu.">
+<style>
+  /* ===== Temel ===== */
+  :root{
+    --text:#0b1220; --muted:#475569; --border:#e5e7eb; --card:#ffffff;
+    --pri:#0b1220; --ok:#16a34a; --bg:#ffffff;
+    --container:1140px; --pad:28px; --radius:20px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    color:var(--text); background:var(--bg); line-height:1.6;
+    overflow-x:hidden; /* taşma yok */
+  }
+  img{max-width:100%; height:auto; display:block}
+  .container{max-width:var(--container); margin-inline:auto; padding-inline:var(--pad)}
+
+  /* ===== Navbar ===== */
+  .navbar{position:sticky; top:0; z-index:20; background:#fff; border-bottom:1px solid var(--border)}
+  .nav{min-height:64px; display:flex; align-items:center; gap:16px}
+  .brand{font-weight:800}
+  .links{margin-left:auto; display:flex; align-items:center; gap:18px}
+  .links a{color:inherit; text-decoration:none; padding:8px 10px; border-radius:10px}
+  .links a:hover{background:#f1f5f9}
+  .btn{display:inline-flex; align-items:center; gap:8px; border:1px solid var(--pri); border-radius:12px; padding:10px 14px; font-weight:700; text-decoration:none}
+  .btn.primary{background:var(--pri); color:#fff}
+  .btn.ok{border-color:var(--ok); background:#ecfdf5; color:#15803d}
+
+  /* ===== Hero ===== */
+  .hero{
+    background:linear-gradient(180deg,#f7fafc 0%, #ffffff 30%, #fff4d6 100%);
+    border-bottom:1px solid var(--border);
+  }
+  .hero-wrap{padding:64px 0 40px}
+  .hero-grid{display:grid; grid-template-columns:1.05fr .95fr; gap:28px}
+  .eyebrow{display:flex; align-items:center; gap:10px; font-weight:800; margin-bottom:10px}
+  .hero h1{margin:0 0 14px; font-size:clamp(34px,4.8vw,58px); line-height:1.1; letter-spacing:-.02em}
+  .hero p{max-width:720px; color:var(--muted); margin:0 0 18px}
+  .hero-actions{display:flex; gap:12px; flex-wrap:wrap}
+
+  /* ===== 3 Kart ===== */
+  .cards-area{padding:24px 0 60px}
+  .cards{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; justify-items:center}
+  .card{
+    width:100%; max-width:350px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:14px; box-shadow:0 10px 24px rgba(0,0,0,.05); transition:transform .15s, box-shadow .15s;
+  }
+  .card:hover{transform:translateY(-2px); box-shadow:0 18px 36px rgba(0,0,0,.08)}
+  .thumb{width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:14px}
+  .card h3{margin:10px 0 6px; font-size:20px; letter-spacing:-.01em}
+  .card p{margin:0; color:var(--muted)}
+
+  /* ===== Alternatif Bölümler ===== */
+  .features-alt{background:linear-gradient(180deg,#fff4d6 0%, #ffffff 100%); padding:80px 0}
+  .pair{
+    display:flex; align-items:center; justify-content:center; gap:70px;
+    margin:80px auto; max-width:1200px; padding-inline:40px;
+  }
+  .pair.reverse{flex-direction:row-reverse}
+  .img-box{
+    flex:1; max-width:520px; border:1px solid var(--border); border-radius:26px; overflow:hidden;
+    box-shadow:0 10px 28px rgba(0,0,0,.06);
+  }
+  .img-box img{width:100%; height:auto; display:block}
+  .text-box{flex:1; max-width:520px}
+  .text-box h2{margin:0 0 12px; font-size:clamp(28px,3.4vw,40px); line-height:1.25}
+  .text-box p{margin:0; color:#1e293b; line-height:1.7; font-size:18px}
+
+  /* ===== CTA ===== */
+  .cta{padding:64px 0; border-top:1px solid var(--border); border-bottom:1px solid var(--border); background:#fff}
+  .panel{
+    background:linear-gradient(180deg,#f8fafc 0%, #dcfce7 100%);
+    border:1px solid var(--border); border-radius:20px; padding:28px;
+  }
+  .panel h2{margin:0 0 10px; font-size:clamp(26px,4vw,40px)}
+  .panel p{margin:0 0 14px; color:var(--muted)}
+
+  /* ===== Pricing ===== */
+  .pricing{padding:56px 0}
+  .note{text-align:center; color:var(--muted); margin:4px 0 12px}
+  .pricing h2{text-align:center; margin:8px 0 24px}
+  .plans{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+  .plan{background:#fff; border:1px solid var(--border); border-radius:20px; padding:18px; display:flex; flex-direction:column; min-height:280px}
+  .plan .title{color:var(--muted); font-weight:700}
+  .plan .price{font-size:28px; font-weight:900; margin:6px 0 10px}
+  .plan ul{list-style:none; margin:0 0 16px; padding:0}
+  .plan li{margin:8px 0}
+  .plan .cta{margin-top:auto}
+  .plan .cta .btn{width:100%; text-align:center}
+  .plan.free .cta .btn{background:#f1f5f9; border-color:#cbd5e1; color:#0f172a}
+
+  /* ===== Footer ===== */
+  .footer{padding:22px 0; border-top:1px solid var(--border)}
+  .foot{display:flex; justify-content:space-between; align-items:center; color:var(--muted); font-size:14px}
+
+  /* ===== Responsive ===== */
+  @media (max-width:1024px){
+    .hero-grid{grid-template-columns:1fr}
+  }
+  @media (max-width:900px){
+    .cards{grid-template-columns:1fr}
+    .card{max-width:560px}
+    .pair{flex-direction:column; gap:40px; padding-inline:24px; text-align:center}
+    .pair.reverse{flex-direction:column}
+    .text-box{max-width:680px}
+  }
+  /* === MOBILE FIX === */
+@media (max-width: 820px){
+  .container{ padding-inline:16px; }
+
+  /* Navbar: linkler taşmasın, butonlar minik olsun */
+  .nav{ min-height:56px; gap:10px; }
+  .nav .links{
+    gap:8px;
+    flex-wrap:nowrap;
+    overflow-x:auto;           /* ihtiyaç olursa yana kayar */
+    -webkit-overflow-scrolling:touch;
+  }
+  .nav .links a{ padding:6px 8px; font-size:13px; }
+  .nav .links .button,
+  .btn{ padding:8px 10px; border-radius:10px; font-size:13px; }
+  .btn.primary{ padding:9px 12px; }
+
+  /* Hero: tek kolon + daha küçük başlık/padding */
+  .hero .wrap{ padding:28px 0 16px; }
+  .hero .grid{ grid-template-columns:1fr; gap:18px; }
+  .hero h1{ font-size:clamp(26px, 7vw, 34px); line-height:1.15; }
+  .hero p{ font-size:14px; }
+
+  /* 3 kart: tek sütun, tam genişlik */
+  .cards{ grid-template-columns:1fr; gap:14px; }
+  .card{ max-width:100%; padding:12px; }
+  .thumb{ aspect-ratio:16/9; border-radius:12px; }
+
+  /* Alternatif bloklar: üst üste gelsin, nefesli olsun */
+  .features-alt{ padding:48px 0; }
+  .pair{ flex-direction:column; gap:20px; padding-inline:0; margin:40px auto; text-align:center; }
+  .pair.reverse{ flex-direction:column; }
+  .img-box{ max-width:100%; border-radius:18px; }
+  .text-box{ max-width:100%; }
+  .text-box h2{ font-size:clamp(22px, 6vw, 28px); }
+  .text-box p{ font-size:15px; }
+
+  /* CTA panel ve pricing daha kompakt */
+  .panel{ padding:18px; }
+  .panel h2{ font-size:clamp(20px, 6vw, 26px); }
+  .plans{ grid-template-columns:1fr; gap:12px; }
+  .plan{ padding:14px; border-radius:14px; }
+  .plan .price{ font-size:22px; }
+}
+
+/* ultra küçük telefonlar (<= 380px) için ekstra sıkıştırma */
+@media (max-width:380px){
+  .nav .links a{ padding:5px 6px; font-size:12px; }
+  .btn{ padding:7px 9px; font-size:12px; }
+  .hero h1{ font-size:clamp(22px, 7.5vw, 28px); }
+}
+
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <div class="container nav">
+    <div class="brand">
+      <a href="index.html" style="text-decoration:none; color:inherit; font-weight:800; font-size:22px;">
+        <span style="color:#0b1220;">Hoc</span><span style="color:#3b82f6; margin-left:-1px;">AIm</span>
+      </a>
+    </div>
+    <div class="links">
+      <a href="#pricing">Planını Seç</a>
+      <a href="how-it-works.html">Nasıl Çalışır</a>
+      <a href="login.html" class="btn btn-ghost" id="btnLogin">Giriş Yap</a>
+      <a href="test.html" class="btn nav-main">Ücretsiz Başla</a>
+    </div>
+  </div>
+</header>
+
+  <!-- HERO -->
+  <!-- 🎓 HERO SECTION -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">🧠HocAlm</div>
+
+    <h1 class="hero-title">
+      Seni dinler, seni çözer,<br />
+      senin dilinde anlatır.
+    </h1>
+
+    <p class="hero-desc">
+      Çünkü herkes aynı şekilde öğrenmez — ama herkes öğrenebilir.
+      HocAlm, seni tanır; planlar, anlatır, motive eder.
+      Her öğrenciye özel, yapay zekâ destekli kişisel öğrenme koçu.
+    </p>
+
+    <div class="hero-cta">
+  <a href="test.html" class="hero-btn primary">🎯 Testi Başlat</a>
+  <a href="#" class="hero-btn secondary">⚡ Erken Erişim</a>
+</div>
+  </div>
+</section>
+
+<style>
+.hero {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: clamp(60px, 10vw, 120px) 20px;
+  background: linear-gradient(180deg, #ffffff 0%, #fff8e7 100%);
+}
+
+.hero-inner {
+  max-width: 900px;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 15px;
+  color: #0b1220;
+  padding: 6px 14px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 14px;
+}
+
+.hero-title {
+  font-size: clamp(28px, 6vw, 62px);
+  font-weight: 900;
+  color: #0b1220;
+  line-height: 1.1;
+  margin: 0 0 12px 0;
+}
+
+.hero-desc {
+  color: #475569;
+  font-size: clamp(14px, 2vw, 18px);
+  max-width: 700px;
+  margin: 0 auto 22px auto;
+  line-height: 1.6;
+}
+
+.hero-cta {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+/* Butonlar */
+/* 🎯 HERO özel buton stilleri */
+.hero .hero-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 22px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: none;
+  transition: 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+/* 🔹 Testi Başlat */
+.hero .hero-btn.primary {
+  background: #3b82f6;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(59,130,246,0.25);
+}
+.hero .hero-btn.primary:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+}
+
+/* 🔹 Erken Erişim */
+.hero .hero-btn.secondary {
+  background: linear-gradient(90deg, #16a34a, #22c55e);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(34,197,94,0.25);
+}
+.hero .hero-btn.secondary:hover {
+  filter: brightness(1.05);
+  transform: translateY(-2px);
+}
+
+/* Buton grubu */
+.hero .hero-cta {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+/* === KARTLAR – container + responsive grid === */
+.cards-area{
+  padding: 30px 0 10px;
+  background: transparent; /* istersen buraya yumuşak bir gradient koyabiliriz */
+}
+
+/* Grid sarmalayıcı – sayfa genişliğini sınırla */
+.cards-area .cards{
+  max-width: 1200px;       /* içerik bant genişliği */
+  margin: 0 auto;          /* ortaya al */
+  padding: 0 20px;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(280px, 1fr));
+  gap: 28px;
+  align-items: stretch;
+}
+
+/* Kart – fazla büyümesin */
+.cards-area .card{
+  width: 100%;
+  max-width: 380px;        /* üst sınır: kartlar şişmesin */
+  margin: 0 auto;          /* geniş ekranda da ortalanır */
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 10px 20px rgba(0,0,0,.04);
+  padding: 16px;
+}
+
+/* Görsel taşmasın, modern görünüm */
+.cards-area .card .thumb{
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  aspect-ratio: 16 / 10;   /* tutarlı yükseklik */
+  object-fit: cover;
+}
+
+/* Başlık ve metin */
+.cards-area .card h3{
+  margin: 6px 0 8px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #0b1220;
+}
+.cards-area .card p{
+  margin: 0;
+  color: #475569;
+  line-height: 1.5;
+}
+
+/* Kırılımlar */
+@media (max-width: 1100px){
+  .cards-area .cards{
+    grid-template-columns: repeat(2, minmax(260px, 1fr));
+  }
+}
+@media (max-width: 720px){
+  .cards-area .cards{
+    grid-template-columns: 1fr;
+  }
+  .cards-area .card{
+    max-width: 560px;      /* telefonda biraz geniş olabilir */
+  }
+}
+
+</style>
+
+
+      <!-- 3 Kart -->
+      <div class="cards-area">
+        <div class="cards">
+          <article class="card">
+            <img class="thumb" src="assets/img/icon1.jpg" alt="Seni Tanır">
+            <h3>Seni Tanır</h3>
+            <p>HocAlm, öğrenme tarzını, hedeflerini ve zorluklarını analiz eder.</p>
+          </article>
+          <article class="card">
+            <img class="thumb" src="assets/img/icon2.jpg" alt="Planını Oluşturur">
+            <h3>Planını Oluşturur</h3>
+            <p>Sana özel ders, tekrar ve mola planı oluşturur.</p>
+          </article>
+          <article class="card">
+            <img class="thumb" src="assets/img/icon3.jpg" alt="Seni Motive Eder">
+            <h3>⚡ Seni Motive Eder</h3>
+            <p>Yapay zekâ destekli geri bildirimlerle motive eder, ilerlemeni ölçer.</p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ALT BÖLÜMLER -->
+  <section class="features-alt">
+    <div class="container">
+
+      <div class="pair">
+        <div class="img-box">
+          <img src="assets/img/learn3.jpg" alt="Her öğrenci farklıdır">
+        </div>
+        <div class="text-box">
+          <h2>Her öğrenci farklıdır.HocAlm bunu anlar.</h2>
+          <p>HocAlm, senin öğrenme stilini analiz eder ve anlatım şeklini buna göre değiştirir. Kimi öğrenciye grafiklerle, kimine sesle, kimine örneklerle anlatır. Anlamadığında üslubunu sadeleştirir, hızını senin ritmine uyarlar.</p>
+        </div>
+      </div>
+
+      <div class="pair reverse">
+        <div class="img-box">
+          <img src="assets/img/learn2.jpg" alt="Her gününü planlar">
+        </div>
+        <div class="text-box">
+          <h2>Her gününü planlar. HocAlm seninle birlikte ilerler.</h2>
+          <p>Çalışma alışkanlıklarını analiz ederek sana en uygun günlük ders, tekrar ve mola planını oluşturur. Zamanını verimli kullanmanı sağlar; seninle birlikte öğrenme ritmini düzenler.</p>
+        </div>
+      </div>
+
+      <div class="pair">
+        <div class="img-box">
+          <img src="assets/img/learn1.jpg" alt="Seni motive eder">
+        </div>
+        <div class="text-box">
+          <h2>Seni motive eder, gelişimini seninle birlikte izler.</h2>
+          <p>İlerlemeni sürekli takip eder ve seni motive edecek şekilde geri bildirimler verir. Başarılarını öne çıkarır, zorlandığın konularda destek olur. Haftalık gelişim özetleriyle ilerlemeni görmeni sağlar; ebeveyn paneliyle de ailen süreci kolayca takip edebilir.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta" id="early">
+    <div class="container">
+      <div class="panel">
+        <h2>Hadi başlayalım — öğrenme biçimini birlikte keşfedelim.</h2>
+        <p>2 dakikalık kısa testle öğrenme stilini keşfet, sana özel anlatım planını oluştur.</p>
+        <div style="display:flex; gap:12px; flex-wrap:wrap">
+          <a class="btn primary" href="test.html">Testi Başlat</a>
+          <a class="btn ok" href="#pricing">⚡ Erken Erişim</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="pricing" id="pricing">
+    <div class="container">
+      <p class="note">Ücretsiz deneme — kredi kartı gerekmez.</p>
+      <h2>Öğrenmeye başlamak için en uygun planı seç</h2>
+      <div class="plans">
+        <article class="plan free">
+          <div class="title">Free</div>
+          <div class="price">₺0 / Ay</div>
+          <ul>
+            <li>✓ 10 soru / gün</li>
+            <li>✓ 1 konu anlatımı</li>
+            <li>✓ Temel AI koçu</li>
+          </ul>
+          <div class="cta"><a class="btn" href="test.html">Ücretsiz Dene</a></div>
+        </article>
+        <article class="plan">
+          <div class="title">Premium</div>
+          <div class="price">₺99 / Ay</div>
+          <ul>
+            <li>✓ Sınırsız anlatım</li>
+            <li>✓ Kişisel öğrenme planı</li>
+            <li>✓ İlerleme takibi</li>
+          </ul>
+          <div class="cta"><a class="btn primary" href="#get">Denemeye Başla</a></div>
+        </article>
+        <article class="plan">
+          <div class="title">Pro Mentor</div>
+          <div class="price">₺199 / Ay</div>
+          <ul>
+            <li>✓ Sesli anlatım</li>
+            <li>✓ AI mentor sesi</li>
+            <li>✓ Ebeveyn paneli</li>
+          </ul>
+          <div class="cta"><a class="btn" style="background:#16a34a;color:#fff;border-color:#16a34a" href="#get">Erken Erişim</a></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+  <div class="container foot">
+    <p>© 2025 HocAlm</p>
+    <p><a href="how-it-works.html" style="color:inherit;text-decoration:none">Nasıl Çalışır</a></p>
+  </div>
+</footer>
+
+<script>
+    const loginBtn = document.getElementById('btnLogin');
+    if(loginBtn){
+      loginBtn.addEventListener('click', (e)=>{
+        e.preventDefault();
+        window.location.href = 'login.html';
+      });
+    }
+  </script>
+</body>
+</html>

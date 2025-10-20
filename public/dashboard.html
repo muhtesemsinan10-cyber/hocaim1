@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>HocAlm — Panel</title>
+<meta name="description" content="Kişisel öğrenme panelin: günlük plan, ilerleme ve AI koç.">
+<style>
+  :root{
+    --text:#0b1220; --muted:#475569; --border:#e5e7eb; --card:#fff;
+    --pri:#0b1220; --ok:#16a34a; --blue:#3b82f6; --amber:#f59e0b;
+    --bg:linear-gradient(180deg,#fffdf7 0%, #fff6dc 100%);
+    --radius:18px; --shadow:0 10px 24px rgba(0,0,0,.06);
+    --container:1120px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:var(--text); background:var(--bg); line-height:1.6;}
+  .container{max-width:var(--container); margin:auto; padding:18px 24px}
+  .navbar{position:sticky; top:0; z-index:20; background:#fff; border-bottom:1px solid var(--border)}
+  .nav{min-height:60px; display:flex; align-items:center; gap:16px}
+  .brand{font-weight:900}
+  .links{margin-left:auto; display:flex; gap:12px; align-items:center}
+  .links a{color:inherit; text-decoration:none; padding:8px 10px; border-radius:10px}
+  .links a:hover{background:#f1f5f9}
+  .btn{display:inline-flex; align-items:center; gap:8px; border:1.5px solid var(--pri); border-radius:12px; padding:10px 14px; font-weight:700; text-decoration:none; cursor:pointer; transition:.18s}
+  .btn.primary{background:#0b1220; color:#fff}
+  .btn.ok{border-color:var(--ok); background:#22c55e; color:#fff; box-shadow:0 6px 16px rgba(34,197,94,.22)}
+  .btn.ghost{border:1.5px dashed #94a3b8; color:#334155; background:#fff}
+  .btn.blue{border-color:#3b82f6; background:#3b82f6; color:#fff; box-shadow:0 6px 16px rgba(59,130,246,.22)}
+  .btn.blue:hover{background:#2563eb}
+  .pagehead{padding:18px 0 6px}
+  .pagehead h1{margin:0 0 4px; font-size:clamp(24px,3.6vw,34px)}
+  .muted{color:var(--muted)}
+  .grid{display:grid; grid-template-columns:1.2fr .8fr; gap:18px; align-items:start}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px}
+  .card h2{margin:0 0 8px; font-size:22px}
+  .plan-head{display:flex; align-items:center; justify-content:center; margin-bottom:6px}
+  .chip{display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px; border:1px solid var(--border); background:#fff}
+  .chip.ok{border-color:#bbf7d0; background:#f0fdf4; color:#166534}
+  .chip.blue{border-color:#bfdbfe; background:#eff6ff; color:#1e40af}
+  .chip.amber{border-color:#fde68a; background:#fffbeb; color:#92400e}
+  .task{display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--border); border-radius:12px; background:#fff}
+  .task.done{opacity:.6; text-decoration:line-through}
+  .progress{height:10px; background:#f1f5f9; border-radius:999px; overflow:hidden}
+  .progress>span{display:block; height:100%; width:0; background:linear-gradient(90deg,#22c55e,#16a34a); transition:width .4s}
+  .coach{display:flex; gap:12px; align-items:flex-start}
+  .coach .avatar{width:40px; height:40px; border-radius:50%; background:#0ea5e9; color:#fff; display:grid; place-items:center; font-weight:900}
+  .coach .bubble{flex:1; border:1px solid var(--border); background:#f8fafc; border-radius:14px; padding:12px 14px}
+  .stat{display:flex; gap:10px; align-items:center; padding:10px; border:1px dashed #cbd5e1; border-radius:12px; background:#fff}
+  .stat .num{font-size:22px; font-weight:900}
+  .stat .label{font-size:12px; color:var(--muted)}
+  @media (max-width:960px){ .grid{grid-template-columns:1fr} }
+  /* modal */
+  #reflectModal{position:fixed;inset:0;display:none;background:rgba(0,0,0,.5);align-items:center;justify-content:center;z-index:50}
+</style>
+</head>
+<body>
+<header class="navbar">
+  <div class="container nav">
+    <div class="brand">
+      <a href="index.html" style="text-decoration:none; color:inherit; font-weight:800; font-size:22px;">
+        <span style="color:#0b1220;">Hoc</span><span style="color:#3b82f6; margin-left:-1px;">AIm</span>
+      </a>
+    </div>
+    <div class="links">
+      <a href="#pricing">Planını Seç</a>
+      <a href="how-it-works.html">Nasıl Çalışır</a>
+      <a href="login.html" class="btn btn-ghost" id="btnLogin">Giriş Yap</a>
+      <a href="test.html" class="btn nav-main">Ücretsiz Başla</a>
+    </div>
+  </div>
+</header>
+<main class="container">
+  <div class="pagehead">
+    <h1 id="greet">Merhaba 👋</h1>
+    <p class="muted" id="subtitle">Bugünkü hedeflerini buradan yürütebilirsin.</p>
+  </div>
+
+  <div id="needTest" class="card" style="display:none">
+    <h2>Önce seni tanıyalım 🎯</h2>
+    <p class="muted">Kısa testle öğrenme stilini çıkaralım; planını ona göre kurayım.</p>
+    <div style="display:flex;gap:8px">
+      <a class="btn blue" href="test.html">Testi Başlat</a>
+      <a class="btn" href="index.html">Ana sayfa</a>
+    </div>
+  </div>
+
+  <div id="dash" class="grid" style="display:none">
+    <!-- SOL -->
+    <section class="card">
+      <div class="plan-head"><h2>Bugünkü Plan</h2></div>
+      <div class="chips" id="chips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+
+      <div style="margin:10px 0 8px">
+        <div class="progress"><span id="progFill"></span></div>
+        <small class="muted"><span id="doneCount">0</span>/<span id="totalCount">0</span> tamamlandı</small>
+      </div>
+
+      <div id="tasks" style="display:grid; gap:10px; margin:10px 0 14px"></div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a class="btn ok" href="lesson.html?topic=Limit" id="btnStart">🤖 Derse Başla</a>
+        <a class="btn blue" href="lesson.html?topic=Limit">🚀 Devam Et</a>
+        <a class="btn" href="profile.html">📊 Profil & Sonuçlar</a>
+        <a class="btn" href="test.html">↻ Testi Tekrarla</a>
+        <a class="btn ghost" href="#" id="btnShorten">😴 Bugün yorgunum — planı kısalt</a>
+        <a class="btn" href="#" id="btnTomorrow">📅 Yarın için yeniden planla</a>
+      </div>
+    </section>
+
+    <!-- SAĞ -->
+    <aside class="card">
+      <h2>Detaylar</h2>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px">
+        <div class="stat"><div class="num" id="statLevel">-</div><div class="label">Seviye</div></div>
+        <div class="stat"><div class="num" id="statStyle">-</div><div class="label">Baskın Stil</div></div>
+        <div class="stat"><div class="num" id="statTotal">-</div><div class="label">Toplam Soru</div></div>
+        <div class="stat"><div class="num" id="statConf">-%</div><div class="label">Güven</div></div>
+      </div>
+
+      <div class="coach">
+        <div class="avatar">H</div>
+        <div class="bubble">
+          <div id="coachLine"><strong>HocAlm:</strong> Bugün 20 dakikalık bir başlangıç yapalım mı? 😊</div>
+          <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
+            <a class="btn ok" href="lesson.html?topic=Limit">📘 Derse Başla</a>
+            <a class="btn ghost" href="quiz.html?topic=Limit">🧠 Pekiştir</a>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<!-- Gün sonu refleksiyon modal -->
+<div id="reflectModal">
+  <div style="width:min(560px,92vw);background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px">
+    <h3>📝 Gün Sonu Notu</h3>
+    <p class="muted">Bugün öğrendiğin en ilginç şey neydi? Zorlandığın bir yer oldu mu?</p>
+    <textarea id="reflectInput" rows="5" style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:12px"></textarea>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+      <button id="reflectSkip" class="btn">Daha sonra</button>
+      <button id="reflectSave" class="btn ok">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+function prettyLevel(lvl){
+  const map = { ilkokul:'İlkokul', ortaokul:'Ortaokul', lise:'Lise', universite:'Üniversite', 'üniversite':'Üniversite' };
+  if(!lvl) return '-'; const k = String(lvl).toLowerCase(); return map[k] || (k[0].toUpperCase()+k.slice(1));
+}
+
+const loggedIn = localStorage.getItem('ch.auth') === '1';
+if(!loggedIn){ location.replace('login.html'); }
+
+let profile = null; try{ profile = JSON.parse(localStorage.getItem('ch.profile')||'null'); }catch{}
+if(!profile){ $('#needTest').style.display='block'; } else { $('#dash').style.display='grid'; }
+
+// greet
+const email = localStorage.getItem('ch.userEmail') || 'demo@user.com';
+const first = email.split('@')[0].split('.').map(s=>s[0].toUpperCase()+s.slice(1)).join(' ');
+$('#greet').textContent = `Merhaba ${first} 👋`;
+const levelText = prettyLevel(localStorage.getItem('hocamLevel') || profile?.level);
+$('#subtitle').textContent = `Seviyen: ${levelText} • Bugün küçük adımlarla ilerleyelim.`;
+
+if(profile){
+  $('#statLevel').textContent = levelText;
+  $('#statStyle').textContent = profile.primary?.name || '-';
+  $('#statTotal').textContent = profile.total ?? 10;
+  $('#statConf').textContent  = (profile.confidence ?? 0) + '%';
+}
+
+const styleTips = {
+  V:"Görsellerle özetleyelim. İlk blokta 1 konu–1 şema hedef koydum.",
+  A:"Kısa anlatım + dinleme tekrarları ekledim. İlk blok 10 dk anlatım.",
+  K:"Uygulamalı mini örnekle başlıyoruz. İlk blokta 2 soru–deneme var.",
+  R:"Kısa not–özet yazımı ekledim. İlk blok 8 maddelik özet.",
+  S:"1-2 dakikalık video parçalarıyla giriş yapıyoruz. İlk blok video + not."
+};
+if(profile){ $('#coachLine').innerHTML = `<strong>HocAlm:</strong> ${styleTips[profile.primary?.code] || 'Bugün 20 dakikalık bir başlangıç yapalım mı?'}`; }
+
+// plan
+const todayKey = new Date().toISOString().slice(0,10);
+const saveKey  = 'ch.dayProgress:' + todayKey;
+let plan = null; try{ plan = JSON.parse(localStorage.getItem(saveKey)||'null'); }catch{}
+if(!plan){
+  const base = [
+    { id:'b1', text:'Konu 1 • 15 dk (Pomodoro)', tag:'Konu', done:false },
+    { id:'b2', text:'Tekrar 1 • 10 dk', tag:'Tekrar', done:false },
+    { id:'b3', text:'Soru 1 • 10 dk', tag:'Soru', done:false },
+  ];
+  const addByStyle = { V:'Şema Çizimi • 8 dk', A:'Sesli Anlat • 8 dk', K:'Uygulama • 8 dk', R:'Özet Yaz • 8 dk', S:'Kısa Video • 8 dk' };
+  const extra = addByStyle[profile?.primary?.code || 'V'];
+  base.push({ id:'b4', text:extra, tag:'Kişisel', done:false });
+  plan = { tasks: base };
+  localStorage.setItem(saveKey, JSON.stringify(plan));
+}
+$('#chips').innerHTML = `
+  <span class="chip blue">Seviye: ${levelText}</span>
+  <span class="chip ok">Baskın: ${profile?.primary?.name||'-'}</span>
+  <span class="chip amber">Bugün: ${plan.tasks.length} blok</span>
+`;
+
+const tasksEl = $('#tasks');
+function renderTasks(){
+  tasksEl.innerHTML='';
+  plan.tasks.forEach(t=>{
+    const row = document.createElement('label');
+    row.className = 'task' + (t.done?' done':'');
+    row.innerHTML = `
+      <input type="checkbox" ${t.done?'checked':''} data-id="${t.id}"> 
+      <span class="chip">${t.tag}</span> <div>${t.text}</div>
+    `;
+    tasksEl.appendChild(row);
+  });
+  tasksEl.querySelectorAll('input[type=checkbox]').forEach(ch=>{
+    ch.addEventListener('change', ()=>{
+      const id = ch.getAttribute('data-id');
+      const item = plan.tasks.find(x=>x.id===id);
+      if(item){ item.done = ch.checked; }
+      localStorage.setItem(saveKey, JSON.stringify(plan));
+      updateProgress();
+      renderTasks();
+    });
+  });
+  updateProgress();
+}
+function updateProgress(){
+  const total = plan.tasks.length, done = plan.tasks.filter(t=>t.done).length;
+  $('#totalCount').textContent = total; $('#doneCount').textContent = done;
+  const pct = total? Math.round(done/total*100) : 0; setTimeout(()=> $('#progFill').style.width = pct+'%', 100);
+}
+renderTasks();
+
+function shortenMinutesInText(text, factor){
+  return text.replace(/(\d+)\s*dk/i, (m, n)=> `${Math.max(5, Math.round(parseInt(n,10)*factor))} dk`);
+}
+$('#btnShorten').addEventListener('click',(e)=>{
+  e.preventDefault();
+  plan.tasks = plan.tasks.map(t => ({...t, text:shortenMinutesInText(t.text, 0.7)}));
+  if(plan.tasks.length>3) plan.tasks.pop();
+  localStorage.setItem(saveKey, JSON.stringify(plan)); renderTasks();
+  $('#coachLine').innerHTML = `<strong>HocAlm:</strong> Enerjine göre ayarladım. Bugün kısa ama odaklı gidelim. 💚`;
+});
+$('#btnTomorrow').addEventListener('click',(e)=>{
+  e.preventDefault();
+  const d = new Date(); d.setDate(d.getDate()+1);
+  localStorage.setItem('ch.dayProgress:'+d.toISOString().slice(0,10), JSON.stringify({tasks: plan.tasks.map(t=>({...t,done:false}))}));
+  plan.tasks = plan.tasks.slice(0, Math.min(2, plan.tasks.length));
+  localStorage.setItem(saveKey, JSON.stringify(plan)); renderTasks();
+  alert('Yarına planı hazırladım. Bugünü hafifletiyorum. 🌙');
+});
+
+document.getElementById('logoutBtn').addEventListener('click',()=> localStorage.removeItem('ch.auth'));
+
+// Gün sonu refleksiyon (21:00 sonrası bir defa)
+(function(){
+  const now = new Date();
+  const today = now.toISOString().slice(0,10);
+  const note = localStorage.getItem('ch.reflect:'+today);
+  if(!note && now.getHours()>=21){
+    const m = document.getElementById('reflectModal');
+    const save = document.getElementById('reflectSave');
+    const skip = document.getElementById('reflectSkip');
+    const inp  = document.getElementById('reflectInput');
+    m.style.display='flex';
+    save.onclick = ()=>{
+      const val = (inp.value||'').trim();
+      if(val) localStorage.setItem('ch.reflect:'+today, val);
+      m.style.display='none';
+      location.href = 'goodnight.html';
+    };
+    skip.onclick = ()=> m.style.display='none';
+  }
+})();
+</script>
+</body>
+</html>

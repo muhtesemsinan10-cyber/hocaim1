@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>Ders — HocAIm</title>
+  <link rel="stylesheet" href="style.css"/>
+
+  <style>
+    :root{ --bg:#fffdf7; --text:#0b1220; --muted:#475569; --border:#e5e7eb; --blue:#3b82f6; }
+    body{ margin:0; background:var(--bg); color:var(--text); }
+    html, body { height:100%; }
+    .page{ max-width:1320px; margin:auto; padding:18px 24px; }
+
+    .topbar{ display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+    .topbar h1{ margin:0; font-weight:800; }
+
+    .layout{ display:grid; grid-template-columns:2.2fr .8fr; gap:18px; min-height:calc(100vh - 120px); }
+    @media (max-width:1100px){ .layout{ grid-template-columns:1fr; min-height:unset; } }
+
+    .card{ background:#fff; border:1px solid var(--border); border-radius:18px; box-shadow:0 10px 24px rgba(0,0,0,.06); padding:16px; }
+    .chat{ display:flex; flex-direction:column; height:calc(100vh - 160px); }
+    @media (max-width:1100px){ .chat{ height:auto; } }
+
+    .chat-head{ display:flex; align-items:center; justify-content:space-between; padding-bottom:12px; border-bottom:1px solid var(--border); }
+    .title{ font-weight:900; }
+
+    .thread{ flex:1; overflow:auto; padding:10px 0; scroll-behavior:smooth; }
+    .msg{ display:flex; gap:10px; margin:12px 0; align-items:flex-start; }
+    .ava{ width:40px; height:40px; border-radius:999px; display:grid; place-items:center; background:#0ea5e9; color:#fff; font-weight:800; flex:0 0 40px; }
+    .me .ava{ background:#0b1220; }
+    .bubble{ border:1px solid var(--border); border-radius:14px; padding:12px 14px; background:#fff; white-space:pre-wrap; word-break:break-word; max-width:100%; line-height:1.5; }
+    .me .bubble{ background:#0b1220; color:#fff; border-color:#0b1220; }
+
+    .chip{ border:1px solid var(--border); border-radius:999px; padding:6px 10px; font-weight:700; }
+    .btn{ display:inline-flex; align-items:center; gap:8px; border:1.5px solid var(--text); border-radius:12px; padding:10px 14px; font-weight:800; cursor:pointer; text-decoration:none; }
+    .btn.blue{ background:var(--blue); color:#fff; border-color:var(--blue); box-shadow:0 6px 16px rgba(59,130,246,.22); }
+
+    .foot{ display:flex; gap:10px; padding-top:12px; border-top:1px solid var(--border); background:#fff; }
+    .in{ flex:1; padding:12px; border:1px solid var(--border); border-radius:12px; font:inherit; }
+
+    .side .grid{ display:grid; grid-template-columns:1fr auto; gap:8px 12px; }
+    .muted{ color:var(--muted); }
+    .progress{ height:10px; background:#f1f5f9; border-radius:999px; overflow:hidden; margin:12px 0 6px; }
+    .bar{ display:block; height:100%; width:0; background:linear-gradient(90deg,#22c55e,#16a34a); }
+
+    .actions{ display:flex; gap:8px; flex-wrap:wrap; }
+    .actions .btn{ padding:8px 12px; border-radius:999px; }
+
+    /* --- MOBILE OPTIMIZATION PACK --- */
+    @media (max-width: 480px) {
+      .page { padding: 14px 12px; }
+      .layout { gap: 10px; }
+      .card { border-radius: 16px; }
+
+      .chat-head { padding-bottom: 10px; }
+      .title { font-size: 16px; line-height: 1.25; word-wrap: break-word; hyphens: auto; }
+      .chip { font-size: 12px; padding: 5px 8px; }
+
+      /* Header sağ taraf (Otomatik + Quiz) dikey dizilsin */
+      .chat-head > div:last-child { display:flex; flex-direction: column; align-items: stretch; gap: 8px; }
+
+      .thread { padding: 8px 0; }
+      .msg { margin: 10px 0; }
+      .bubble { line-height: 1.45; }
+
+      .btn { min-height: 44px; font-size: 14px; }
+      .actions .btn { min-height: 38px; font-size: 13px; }
+
+      .in { min-height: 44px; font-size: 15px; padding: 12px; }
+
+      /* Alt bar sabit kalsın; iPhone çentik uyumlu */
+      .foot {
+        position: sticky; bottom: 0; z-index: 5;
+        backdrop-filter: blur(8px);
+        padding-bottom: calc(10px + env(safe-area-inset-bottom));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <a href="dashboard.html" class="btn">⟵ Panel</a>
+      <h1 class="lesson-title">Ders</h1>
+    </header>
+
+    <div class="layout">
+      <!-- SOL: Sohbet -->
+      <section class="card chat">
+        <div class="chat-head">
+          <div>
+            <div id="title" class="title">Ders</div>
+            <small class="muted">AI anlatımı: stiline göre</small>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <span id="modeChip" class="chip">Otomatik</span>
+            <a id="btnQuiz" class="btn">🧠 Pekiştir (Mini Quiz)</a>
+          </div>
+        </div>
+
+        <div id="thread" class="thread"></div>
+
+        <div class="foot">
+          <input id="ask" class="in" placeholder='Örn: "Trigonometri" yaz ve başla; sonra sor: "sin-cos ilişkisi?"'/>
+          <button id="send" class="btn blue">Gönder</button>
+        </div>
+      </section>
+
+      <!-- SAĞ: Özet & Hızlı Aksiyon -->
+      <aside class="card side">
+        <h3>Özet</h3>
+        <div class="grid">
+          <span class="muted">Konu</span> <strong id="kvTopic">—</strong>
+          <span class="muted">Stil</span> <strong id="kvStyle">Otomatik</strong>
+          <span class="muted">Süre</span> <strong id="kvTime">10 dk</strong>
+        </div>
+
+        <div class="progress"><span id="bar" class="bar"></span></div>
+        <small class="muted">İlerleme: <span id="pp">0</span>%</small>
+
+        <h3 style="margin-top:14px;">Hızlı Aksiyon</h3>
+        <div class="actions">
+          <button id="actSimple"  class="btn">Basitleştir</button>
+          <button id="actExample" class="btn">Daha çok örnek</button>
+          <button id="actWhy"     class="btn">“Neden?” de</button>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- ====== APP SCRIPT ====== -->
+  <script>
+    const $ = s => document.querySelector(s);
+
+    // ——— Profil / başlangıç stil ———
+    let profile = null; try{ profile = JSON.parse(localStorage.getItem('ch.profile')||'null'); }catch{}
+    const initialStyle = profile?.primary?.code || 'auto';
+    $('#kvStyle').textContent = ({V:'Görsel',A:'İşitsel',R:'Okuma-Yazma',K:'Kinestetik',auto:'Otomatik'})[initialStyle] || 'Otomatik';
+
+    const state = { topic:null, domain:'general', style:initialStyle, level: profile?.level || 'Lise' };
+
+    // ——— UI helpers ———
+    const thread = $('#thread');
+    function addBot(html){
+      const d=document.createElement('div'); d.className='msg';
+      d.innerHTML = `<div class="ava">H</div><div class="bubble">${html}</div>`;
+      thread.appendChild(d); thread.scrollTop=thread.scrollHeight;
+      turns.push({ role:'assistant', content:String(html).replace(/\s+/g,' ').slice(0,500) });
+      maybeInferStyle();
+    }
+    function addMe(text){
+      const d=document.createElement('div'); d.className='msg me';
+      d.innerHTML = `<div class="bubble">${text}</div><div class="ava">👤</div>`;
+      thread.appendChild(d); thread.scrollTop=thread.scrollHeight;
+      turns.push({ role:'user', content:text.slice(0,300) });
+    }
+    function setTitleTopic(){
+      $('#title').textContent = state.topic ? `“${state.topic}” konusunu birlikte öğrenelim` : 'Ders';
+      $('#kvTopic').textContent = state.topic || '—';
+    }
+    let pct=0; function tick(){ pct=Math.min(100,pct+10); $('#bar').style.width=pct+'%'; $('#pp').textContent=pct; }
+
+    // Otomatik aşağı kaydırma (her yeni mesajda)
+    const observer = new MutationObserver(()=>{ thread.scrollTop = thread.scrollHeight; });
+    observer.observe(thread, { childList: true });
+
+    // Son bot mesajı (hızlı aksiyonlar için)
+    function getLastBotText(){
+      const nodes = Array.from(document.querySelectorAll('#thread .msg'));
+      for (let i = nodes.length - 1; i >= 0; i--){
+        if (!nodes[i].classList.contains('me')){
+          const b = nodes[i].querySelector('.bubble');
+          if (b) return b.innerText || b.textContent || '';
+        }
+      }
+      return '';
+    }
+    const styleLabel = c => ({V:'Görsel',A:'İşitsel',R:'Okuma-Yazma',K:'Kinestetik',auto:'Otomatik'})[c] || 'Otomatik';
+
+    // ——— Akıllı KONu çıkarma (kanonik + domain) ———
+    const TOPIC_RULES = [
+      { re:/bağlaç\w*/i,         canon:'Bağlaçlar',         domain:'lang' },
+      { re:/zamir\w*/i,          canon:'Zamirler',          domain:'lang' },
+      { re:/sıfat\w*/i,          canon:'Sıfatlar',          domain:'lang' },
+      { re:/fiil\w*/i,           canon:'Fiiller',           domain:'lang' },
+      { re:/cümle (öğeleri|türleri|bilgisi)/i, canon:'Cümle Bilgisi', domain:'lang' },
+
+      { re:/trigonometri/i,      canon:'Trigonometri',      domain:'math' },
+      { re:/limit/i,             canon:'Limit',             domain:'math' },
+      { re:/integral/i,          canon:'İntegral',          domain:'math' },
+      { re:/türev/i,             canon:'Türev',             domain:'math' },
+    ];
+    const STOP = new Set(['selam','merhaba','hocam','hoca','acaba','bana','yardım','eder','misin','nedir','nelerdir','nasıl','konusunu','konusunda','hakkında','ile','ilgili','anlamıyorum','zorlanıyorum','sıkıntı','yaşıyorum','var','mı','mi']);
+
+    function extractTopic(raw){
+      const lower = raw.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,' ').replace(/\s+/g,' ').trim();
+      // 1) Kurallı eşleşme
+      for (const r of TOPIC_RULES){
+        if (r.re.test(lower)) return { topic:r.canon, domain:r.domain };
+      }
+      // 2) Stopwords at → ilk 1-2 kelimeyi başlık yap
+      const words = lower.split(' ').filter(w=>!STOP.has(w)).slice(0,2);
+      const t = words.map(w=>w.replace(/\b\p{L}/u,m=>m.toUpperCase())).join(' ');
+      return { topic: t || 'Genel', domain:'general' };
+    }
+
+    // ——— Sunucu köprüleri ———
+    async function explain({ prompt, topic, extra }){
+      const r = await fetch('/api/explain',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ prompt, topic, style: state.style, level: state.level, context: extra||'' })
+      });
+      return r.json();
+    }
+
+    // ——— Stil çıkarımı (mesaj atma YOK, sadece özeti güncelle) ———
+    let turns=[]; let inferCounter=0;
+    async function maybeInferStyle(){
+      inferCounter++;
+      if (inferCounter % 3 !== 0) return;
+      try{
+        const r = await fetch('/api/style-infer',{
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ turns: turns.slice(-8) })
+        });
+        const data = await r.json();
+        if (data?.ok && data.style && data.confidence >= 60){
+          state.style = data.style;
+          const label = styleLabel(data.style);
+          $('#kvStyle').textContent = label;
+          $('#modeChip').textContent = label;
+          // sohbet içine mesaj atma!
+        }
+      }catch(e){ console.error(e); }
+    }
+
+    // ——— Karşılama ———
+    addBot('Hangi konuda yardımcı olmamı istersin? Örn: <em>limit, integral, trigonometri, bağlaçlar, zamirler…</em>');
+    setTitleTopic();
+
+    // ——— Gönder ———
+    const $ask = $('#ask'); const $send = $('#send');
+    $send.addEventListener('click', async ()=>{
+      const text = ($ask.value||'').trim();
+      if (!text) return;
+      addMe(text); $ask.value='';
+
+      // Konu yoksa: çıkar, başlığı/özeti güncelle ve giriş üret
+      if (!state.topic){
+        const res = extractTopic(text);
+        state.topic  = res.topic;
+        state.domain = res.domain;
+        setTitleTopic();
+
+        addBot(`Harika! <strong>${state.topic}</strong> ile başlayalım. Kısa bir giriş hazırlıyorum…`);
+        try{
+          const data = await explain({ topic: state.topic });
+          addBot(data?.ok ? data.html : 'AI yanıtı alınamadı, tekrar dener misin?');
+          if (data?.ok) tick();
+        }catch(e){ console.error(e); addBot('Bir hata oluştu.'); }
+        return;
+      }
+
+      // Konu belirlendiyse normal soru
+      try{
+        const data = await explain({ prompt: text, topic: state.topic });
+        addBot(data?.ok ? data.html : 'AI yanıtı alınamadı.');
+        if (data?.ok) tick();
+      }catch(e){ console.error(e); addBot('Bir hata oluştu.'); }
+    });
+    $ask.addEventListener('keydown', e=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); $send.click(); } });
+
+    // ——— Hızlı aksiyonlar: konu + son bot cevabı bağlamıyla ———
+    function topicGuard(){ if (!state.topic){ addBot('Önce bir konu yaz 🙂'); return false; } return true; }
+
+    $('#actSimple').addEventListener('click', async ()=>{
+      if (!topicGuard()) return;
+      const base = getLastBotText() || `Konu: ${state.topic}`;
+      const prompt = `KONU: ${state.topic}
+STİL: ${styleLabel(state.style)}
+Aşağıdaki açıklamayı bu konu için daha basit, kısa ve 3 madde halinde özetle. Gerekirse minik bir ipucu/benzetme ekle.
+
+--- METİN ---
+${base}
+--- SON ---
+`;
+      const data = await explain({ prompt, topic: state.topic });
+      addBot(data?.ok ? data.html : '—'); if (data?.ok) tick();
+    });
+
+    $('#actExample').addEventListener('click', async ()=>{
+      if (!topicGuard()) return;
+      const base = getLastBotText() || `Konu: ${state.topic}`;
+      // konu alanına göre örnek isteğini sabitle
+      const isLang = state.domain === 'lang';
+      const isMath = state.domain === 'math';
+      const task = isLang
+        ? `Bu konu TÜRKÇE DİLBİLGİSİ kapsamındadır. 3 örnek cümle yaz:
+- her cümlenin yanına kısa açıklama koy
+- yanlış örnek + düzeltmesini de ekle (en az 1 adet)`
+        : isMath
+        ? `Bu konu MATEMATİK kapsamındadır. 2 kolay + 1 orta seviye ÇÖZÜMLÜ soru üret:
+- her soruyu adım adım çöz
+- yaygın yapılan bir hatayı göster ve düzelt`
+        : `Bu konu için 3 somut ve günlük hayattan örnek üret; her örneği kısa açıklamayla açıkla.`;
+
+      const prompt = `KONU: ${state.topic}
+STİL: ${styleLabel(state.style)}
+${task}
+
+--- ELİMDEKİ AÇIKLAMA ---
+${base}
+--- SON ---
+`;
+      const data = await explain({ prompt, topic: state.topic });
+      addBot(data?.ok ? data.html : '—'); if (data?.ok) tick();
+    });
+
+    $('#actWhy').addEventListener('click', async ()=>{
+      if (!topicGuard()) return;
+      const base = getLastBotText() || `Konu: ${state.topic}`;
+      const prompt = `KONU: ${state.topic}
+Bu kavram neden önemlidir, nerelerde işime yarar? 4-6 cümlede açıkla.
+1 gerçek hayat kullanım senaryosu ver. Dili ${styleLabel(state.style)} stile uygun, anlaşılır olsun.
+
+--- METİN ---
+${base}
+--- SON ---
+`;
+      const data = await explain({ prompt, topic: state.topic });
+      addBot(data?.ok ? data.html : '—'); if (data?.ok) tick();
+    });
+
+    // Quiz
+    $('#btnQuiz').addEventListener('click', ()=>{
+      const t = state.topic || 'Genel';
+      location.href = `quiz.html?topic=${encodeURIComponent(t)}`;
+    });
+  </script>
+</body>
+</html>

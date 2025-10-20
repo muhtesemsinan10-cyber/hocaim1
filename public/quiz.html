@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="tr">
+<head>
+    <link rel="stylesheet" href="style.css">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Quiz — HocAlm</title>
+<style>
+  body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:#fffdf5;color:#0b1220}
+  .wrap{max-width:860px;margin:auto;padding:22px}
+  .card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;box-shadow:0 8px 20px rgba(0,0,0,.05);padding:18px;margin:14px 0}
+  .btn{display:inline-flex;align-items:center;gap:8px;border:1.5px solid #0b1220;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;text-decoration:none}
+  .btn.primary{background:#0b1220;color:#fff}
+  .btn.ok{border-color:#16a34a;background:#ecfdf5;color:#166534}
+  .muted{color:#475569}
+  .choices label{display:block;border:1px solid #e5e7eb;border-radius:12px;padding:10px;margin:8px 0;cursor:pointer}
+  .choices input{margin-right:8px}
+  .explain{background:#fff7ed;border:1px solid #fed7aa;padding:12px;border-radius:12px;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🚀 Kendini test et</h1>
+  <p class="muted" id="subtitle"></p>
+
+  <div id="qList"></div>
+
+  <div class="card" style="display:flex;gap:10px;justify-content:space-between;align-items:center">
+    <div><strong id="scoreTxt">0/0</strong> tamamlandı</div>
+    <div>
+      <a class="btn" href="lesson.html">↩︎ Derse dön</a>
+      <button id="finish" class="btn ok">Bitti</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const qs = new URLSearchParams(location.search);
+const topic = qs.get('topic') || 'Limit';
+document.getElementById('subtitle').textContent = `Konu: ${topic} — 3 soruluk mini test`;
+
+let questions = [];
+let score = 0, answered = 0;
+
+async function loadQuiz(){
+  try{
+    const r = await fetch('/api/quiz',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic})});
+    const data = await r.json();
+    questions = data.questions || [];
+  }catch{ // demo fallback
+    questions = [
+      { id:'q1', q:'Limit neyi ifade eder?', choices:['Fonksiyonun değerini','Yaklaşım davranışını','Türevini','Alanını'], correct:1, explain:'Limit bir noktaya yaklaşırken fonksiyonun gitmek istediği değeri ölçer.'},
+      { id:'q2', q:'Sağ ve sol limit aynıysa?', choices:['Limit yok','Türev vardır','Limit vardır','Süreksiz'], correct:2, explain:'Sağ/sol yaklaşım aynı değere gidiyorsa limit vardır.'},
+      { id:'q3', q:'f(x)=(x²-1)/(x-1) için x→1 limit?', choices:['0','1','2','Tanımsız'], correct:2, explain:'Sadeleşince f(x)=x+1 (x≠1). x→1 iken 2’ye yaklaşır.'},
+    ];
+  }
+  render();
+}
+
+function render(){
+  const box = document.getElementById('qList');
+  box.innerHTML = '';
+  questions.forEach((it,i)=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div><strong>S${i+1}.</strong> ${it.q}</div>
+      <div class="choices">
+        ${it.choices.map((c,idx)=>`
+          <label><input type="radio" name="${it.id}" value="${idx}">${c}</label>
+        `).join('')}
+      </div>
+      <div class="explain" id="exp-${it.id}" style="display:none"></div>
+    `;
+    card.querySelectorAll('input[type=radio]').forEach(r=>{
+      r.addEventListener('change', async ()=>{
+        if(r.dataset.lock) return;
+        r.dataset.lock = '1';
+        const chosen = +r.value;
+        const ok = chosen === (it.correct ?? it.correctIndex);
+        answered++; if(ok) score++;
+        document.getElementById('scoreTxt').textContent = `${score}/${answered}`;
+
+        const exp = document.getElementById('exp-'+it.id);
+        exp.style.display='block';
+        exp.innerHTML = ok ? '✅ Doğru! Harika gidiyorsun.' : `❌ Yanlış. ${it.explain||'Doğru yaklaşım: sağ/sol limitleri düşün.'}`;
+      });
+    });
+    box.appendChild(card);
+  });
+}
+
+document.getElementById('finish').addEventListener('click', ()=>{
+  alert(`🎉 Quiz bitti! Skorun: ${score}/${questions.length}\nYarın kısa tekrar ekleyeceğim.`);
+  // küçük ilerleme yaz
+  const key = 'ch.focus:'+new Date().toISOString().slice(0,10);
+  const cur = parseInt(localStorage.getItem(key)||'0',10);
+  localStorage.setItem(key, String(cur + 10)); // 10 dk bonus
+  location.href = 'progress.html';
+});
+
+loadQuiz();
+</script>
+</body>
+</html>

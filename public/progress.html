@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="tr">
+<head>
+    <link rel="stylesheet" href="style.css">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>İlerleme — HocAlm</title>
+<meta name="description" content="Son 14 gün odak ve verim raporu.">
+<style>
+  :root{--border:#e5e7eb;--muted:#475569;--text:#0b1220}
+  *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;color:var(--text);background:#fffdf5}
+  .wrap{max-width:1120px;margin:auto;padding:18px 24px}
+  .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
+  .card{background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 20px rgba(0,0,0,.05);padding:16px}
+  .btn{display:inline-flex;align-items:center;gap:8px;border:1.5px solid #0b1220;border-radius:12px;padding:10px 14px;font-weight:700;text-decoration:none;cursor:pointer}
+  .btn.blue{background:#3b82f6;border-color:#3b82f6;color:#fff}
+  .btn{margin-right:6px;margin-bottom:6px}
+  .muted{color:var(--muted)}
+  @media (max-width:980px){.grid{grid-template-columns:1fr}}
+  
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header style="display:flex;gap:12px;align-items:center;margin-bottom:6px">
+    <a href="dashboard.html" class="btn">⟵ Panel</a>
+    <h1 style="margin:0">İlerleme & Rapor</h1>
+  </header>
+
+  <div class="grid">
+    <!-- Sol: Grafikler -->
+    <section class="card">
+      <h2>Son 14 Gün Odak Süresi</h2>
+      <canvas id="c14" height="80"></canvas>
+      <div style="margin-top:10px">
+        <button id="btnExport" class="btn">⬇️ CSV İndir</button>
+        <button id="btnDemo" class="btn">🔧 Demo Veri Ekle</button>
+        <button id="btnClear" class="btn">🗑️ Temizle (rapor verisi)</button>
+      </div>
+
+      <div style="margin-top:12px">
+        <button id="btnSuggest" class="btn blue">💡 AI’den öneri al</button>
+        <div id="aiSuggestBox" class="card" style="display:none;margin-top:10px"></div>
+      </div>
+    </section>
+
+    <!-- Sağ: Son yansımalar -->
+    <aside class="card">
+      <h2>Son Yansımalar</h2>
+      <div id="notesBox" class="muted">Henüz yansıma kaydı yok.</div>
+    </aside>
+  </div>
+</div>
+
+<script>
+const dayNames = ['Paz','Pzt','Sal','Çar','Per','Cum','Cts'];
+const d2 = n=> String(n).padStart(2,'0');
+
+function lastNDays(n){
+  const arr=[]; const now=new Date();
+  for(let i=n-1;i>=0;i--){
+    const d=new Date(now); d.setDate(d.getDate()-i);
+    const key=`${d.getFullYear()}-${d2(d.getMonth()+1)}-${d2(d.getDate())}`;
+    arr.push({ key, label: dayNames[d.getDay()] });
+  }
+  return arr;
+}
+
+function readFocusSeries(n=14){
+  return lastNDays(n).map(d=>{
+    const mins = parseInt(localStorage.getItem('ch.focus:'+d.key)||'0',10);
+    return { ...d, mins };
+  });
+}
+
+function drawChart(){
+  const rows = readFocusSeries(14);
+  const ctx = document.getElementById('c14');
+  new Chart(ctx, {
+    type:'bar',
+    data:{ labels: rows.map(r=>r.label), datasets: [{ data: rows.map(r=>r.mins) }]},
+    options:{
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:(c)=> `${c.parsed.y} dk`}}},
+      scales:{ y:{ suggestedMax: Math.max(40, Math.max(...rows.map(r=>r.mins))+10) } }
+    }
+  });
+}
+
+function exportCSV(){
+  const rows = readFocusSeries(14);
+  const lines = ['tarih,dk', ...rows.map(r=>`${r.key},${r.mins}`)];
+  const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'rapor.csv'; a.click();
+}
+
+function fillDemo(){
+  const now = new Date();
+  for(let i=0;i<14;i++){
+    const d=new Date(now); d.setDate(d.getDate()-i);
+    const key=`${d.getFullYear()}-${d2(d.getMonth()+1)}-${d2(d.getDate())}`;
+    localStorage.setItem('ch.focus:'+key, String(25 + Math.floor(Math.random()*31))); // 25–55 dk
+  }
+  location.reload();
+}
+function clearReport(){
+  // sadece ch.focus:* temizle
+  Object.keys(localStorage).forEach(k=>{ if(k.startsWith('ch.focus:')) localStorage.removeItem(k); });
+  location.reload();
+}
+document.getElementById('btnExport').onclick = exportCSV;
+document.getElementById('btnDemo').onclick   = fillDemo;
+document.getElementById('btnClear').onclick  = clearReport;
+
+function loadNotes(){
+  const box = document.getElementById('notesBox');
+  const items = [];
+  for(let i=0;i<14;i++){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const key=`${d.getFullYear()}-${d2(d.getMonth()+1)}-${d2(d.getDate())}`;
+    const note = localStorage.getItem('ch.reflect:'+key);
+    if(note) items.push({key,note});
+  }
+  if(!items.length){ box.textContent='Henüz yansıma kaydı yok.'; return; }
+  box.innerHTML = items.map(x=>`<div style="padding:8px 0;border-bottom:1px dashed #e5e7eb"><strong>${x.key}</strong><br>${x.note}</div>`).join('');
+}
+
+document.getElementById('btnSuggest')?.addEventListener('click', async ()=>{
+  const focus = readFocusSeries(7).map(r=>({date:r.key, mins:r.mins}));
+  const reflections = [];
+  for(let i=0;i<7;i++){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const key=`${d.getFullYear()}-${d2(d.getMonth()+1)}-${d2(d.getDate())}`;
+    const note = localStorage.getItem('ch.reflect:'+key);
+    if(note) reflections.push({date:key, note});
+  }
+  let profile=null; try{ profile = JSON.parse(localStorage.getItem('ch.profile')||'null'); }catch{}
+  const r = await fetch('/api/suggest', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({profile, focus, reflections}) });
+  const data = await r.json();
+  const box = document.getElementById('aiSuggestBox');
+  box.style.display='block';
+  box.innerHTML = `<h3>Bu hafta için öneriler</h3><ul>${(data.suggestions||[]).map(s=>`<li>${s}</li>`).join('')}</ul>`;
+});
+
+drawChart();
+loadNotes();
+</script>
+</body>
+</html>

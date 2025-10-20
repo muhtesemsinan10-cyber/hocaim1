@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>HocAlm — Öğrenme Stili Testi</title>
+<meta name="description" content="Seviyene göre 10 soruluk öğrenme stili testi. Çocuk dostu dil, 5 şık.">
+<style>
+  /* ====== Seviye Seçim Overlay ====== */
+  .level-overlay{position:fixed;inset:0;background:rgba(255,255,255,.95);display:flex;align-items:center;justify-content:center;z-index:999}
+  .level-box{background:#fff;border-radius:20px;padding:32px 40px;box-shadow:0 10px 30px rgba(0,0,0,.08);max-width:420px;width:92%;text-align:center}
+  .level-box h2{margin:0 0 8px}
+  .level-box p{color:#555;margin:0 0 18px}
+  .level-options{display:flex;flex-direction:column;gap:10px}
+  .level-options button{border:2px solid #16a34a;background:#fff;color:#16a34a;font-weight:800;border-radius:12px;padding:12px;cursor:pointer;transition:.2s}
+  .level-options button:hover{background:#16a34a;color:#fff;transform:scale(1.02)}
+
+  /* ====== Tema ====== */
+  :root{--text:#0b1220;--muted:#475569;--border:#e5e7eb;--card:#fff;--ok:#16a34a;--bg:linear-gradient(180deg,#fffdf5 0%,#fff4d6 100%);--radius:18px;--shadow:0 10px 20px rgba(0,0,0,.05)}
+  *{box-sizing:border-box}html,body{margin:0;padding:0}
+  body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.6}
+  header{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--border);box-shadow:0 2px 10px rgba(0,0,0,.03);z-index:50}
+  .nav{max-width:920px;margin:auto;padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+  .brand{font-weight:900}
+
+  main{width:100%;min-height:calc(100vh - 72px);display:flex;align-items:center;justify-content:center;padding:40px 0}
+  .wrap{max-width:900px;width:100%;padding:20px;display:flex;justify-content:center}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px;width:100%;max-width:760px}
+
+  .title{font-size:28px;font-weight:900;margin:0 0 6px}
+  .muted{color:var(--muted)}
+  .prog{height:8px;background:#f1f5f9;border-radius:999px;overflow:hidden;margin:12px 0 18px}
+  .prog>span{display:block;height:100%;width:0;background:var(--ok);transition:width .3s ease}
+  .qtext{font-size:18px;font-weight:800;margin:10px 0}
+  .ops{display:grid;gap:10px}
+  .op{border:1px solid var(--border);background:#fff;border-radius:14px;padding:14px 16px;cursor:pointer;transition:.2s;font-size:15px;text-align:left}
+  .op:hover{border-color:var(--ok);background:#f0fdf4}
+  .op.sel{background:#16a34a;color:#fff;border-color:#16a34a;box-shadow:0 0 0 2px #bbf7d0}
+  .bar{display:flex;align-items:center;justify-content:space-between;margin-top:20px}
+  .bar button{all:unset;display:inline-block;border-radius:10px;padding:10px 24px;font-weight:700;font-size:15px;cursor:pointer;transition:.2s;border:1.5px solid #0b1220;background:#fff;color:#0b1220}
+  .bar button:hover{background:#0b1220;color:#fff;transform:translateY(-1px)}
+  .bar button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+  .bar button.next{border-color:#16a34a;background:#16a34a;color:#fff}
+  .bar button.next:hover{background:#15803d;border-color:#15803d}
+  .error{display:none;color:#ef4444;font-size:14px;margin-top:8px}
+
+  /* ====== Sonuç görünümü ====== */
+  .result{display:none;margin-top:18px}
+  .result h2{margin:10px 0 6px}
+  .pill{display:inline-block;padding:6px 12px;background:#f0fdf4;border-radius:999px;border:1px solid #bbf7d0;font-size:13px;margin-right:6px}
+  .tips{border-top:1px dashed var(--border);margin-top:14px;padding-top:10px;color:var(--muted)}
+  .cta{margin-top:8px;display:inline-block;background:#16a34a;color:#fff;border:none;border-radius:12px;padding:14px 28px;font-weight:800;font-size:16px;cursor:pointer;transition:.2s;box-shadow:0 8px 20px rgba(22,163,74,.18)}
+  .cta:hover{background:#15803d;transform:scale(1.03)}
+  .cta:active{transform:scale(.98)}
+
+  /* Ortalanmış buton alanları */
+  .result .cta-wrap{display:flex;justify-content:center;margin-top:16px}
+  .btn-row{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:12px}
+
+  .btn{all:unset;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;transition:all .2s}
+  .btn-outline{border:2px solid #0b1220;color:#0b1220;background:#fff}
+  .btn-outline:hover{background:#0b1220;color:#fff}
+  .btn-ghost{border:2px dashed #94a3b8;color:#475569;background:#fff}
+  .btn-ghost:hover{border-color:#0b1220;color:#0b1220}
+
+  @media (max-width:640px){
+    .card{padding:20px}
+    .title{font-size:22px}
+    .op{font-size:14px;padding:12px}
+    .btn{width:100%}
+  }
+</style>
+</head>
+<body>
+
+<!-- Seviye seçimi -->
+<div id="levelSelect" class="level-overlay">
+  <div class="level-box">
+    <h2>🎓 Hangi seviyedesin?</h2>
+    <p>Seçimine göre sana özel sorular hazırlayacağız 👇</p>
+    <div class="level-options">
+      <button data-level="ilkokul">İlkokul</button>
+      <button data-level="ortaokul">Ortaokul</button>
+      <button data-level="lise">Lise</button>
+      <button data-level="universite">Üniversite</button>
+    </div>
+  </div>
+</div>
+
+<header>
+  <div class="nav">
+    <div class="brand">📘 HocAlm</div>
+    <a href="index.html" class="brand" style="font-weight:700">Ana Sayfa</a>
+  </div>
+</header>
+<main>
+  <div class="wrap">
+    <section class="card" id="quiz">
+      <h1 class="title">Öğrenme Stili Testi</h1>
+      <p class="muted">10 soru • Her soruda <strong>1</strong> seçenek işaretle. Sonunda öğrenme biçimini ve işe yarar ipuçlarını görürsün.</p>
+      <div class="prog"><span id="progBar"></span></div>
+
+      <div class="qbox">
+        <div class="muted" id="step"></div>
+        <h3 class="qtext" id="qText"></h3>
+        <div class="ops" id="ops"></div>
+        <div class="error" id="err">Lütfen bir seçenek işaretle.</div>
+      </div>
+
+      <div class="bar">
+        <button id="prev">Geri</button>
+        <div class="muted" id="progressHint" aria-live="polite"></div>
+        <div>
+          <button class="next" id="next">İleri</button>
+          <button class="next" id="finish" style="display:none">Bitir</button>
+        </div>
+      </div>
+
+      <div class="result" id="resultBox">
+        <h2 id="resultTitle"></h2>
+        <div id="badges" style="margin-bottom:6px"></div>
+        <p class="muted" id="resultExplain"></p>
+        <div class="tips" id="tips"></div>
+
+        <div class="cta-wrap">
+          <button class="cta" id="ctaBtn">🚀 Hadi başlayalım</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-outline" id="restart">↻ Baştan Yap</button>
+          <button class="btn btn-ghost" id="changeLevel">🎓 Seviyeyi Değiştir</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+/* ========== 1) Seviyeye göre sade soru havuzları ========== */
+const LEVEL_QUESTIONS = {
+  ilkokul: [
+    { t:"Yeni bir şeyi öğrenirken en çok hangisini seversin?",
+      a:[["Resimlere bakarım","V"],["Anlatılınca dinlerim","A"],["Kendim denerim","K"],["Yazarak çalışırım","R"],["Kısa video izlerim","S"]]},
+    { t:"Öğretmen yeni konu anlattı. En çok hangisi işine yarar?",
+      a:[["Tahtadaki çizimler","V"],["Sakince dinlemek","A"],["Deney yapmak","K"],["Deftere özet yazmak","R"],["Kısa bir video","S"]]},
+    { t:"Yolunu karıştırdın. Nasıl bulursun?",
+      a:[["Haritaya bakarım","V"],["Birine sorup dinlerim","A"],["Etrafı gezip denerim","K"],["Yazılı tarifi okurum","R"],["Kısa yol videosu izlerim","S"]]},
+    { t:"Evde proje ödevi var. İlk ne yaparsın?",
+      a:[["Resim/çizimle plan yaparım","V"],["Ailemle konuşurum","A"],["Malzemeleri kurcalarım","K"],["Adımları yazarım","R"],["Nasıl yapılır videosu açarım","S"]]},
+    { t:"Bir hikâyeyi en iyi nasıl hatırlarsın?",
+      a:[["Resimlerine bakarım","V"],["Dinlerim","A"],["Oyuncaklarla canlandırırım","K"],["Not alırım","R"],["Kısa film izlerim","S"]]},
+    { t:"Matematikte yeni bir yol öğrendin. Nasıl anlarsın?",
+      a:[["Renkli şekillerle","V"],["Açıklamayı dinleyerek","A"],["Somut parçalarla deneyerek","K"],["Adımları yazarak","R"],["Anlatımlı video ile","S"]]},
+    { t:"Sınava hazırlanırken ne yaparsın?",
+      a:[["Konu haritası çizerim","V"],["Arkadaşımla birbirimize anlatırız","A"],["Uygulamalı soru çözerim","K"],["Temiz not tutarım","R"],["Kısa konu videoları izlerim","S"]]},
+    { t:"Yeni bir oyunu öğrenirken…",
+      a:[["Kuralları resimle görürsem anlarım","V"],["Biri anlatırsa anlarım","A"],["Hemen oynayıp denerim","K"],["Kuralları okuyup denerim","R"],["Öğreten videoya bakarım","S"]]},
+    { t:"Bilmediğin kelimeyi öğrenmek için…",
+      a:[["Resimli sözlüğe bakarım","V"],["Söylenişini dinlerim","A"],["Cümlede kullanırım","K"],["Anlamını yazıp tekrar ederim","R"],["Kısa açıklama videosu izlerim","S"]]},
+    { t:"Ödev yaparken nasıl motive olursun?",
+      a:[["Renkli kalem/şemalar","V"],["Sessizce dinleyip çalışmak","A"],["Kısa hareketli molalar","K"],["Yapılacaklar listesi","R"],["Önce hızlı bir video ile hatırlamak","S"]]}
+  ],
+  ortaokul: [
+    { t:"Yeni bir konuyu en iyi nasıl kavrarsın?",
+      a:[["Şema/infografik görmek","V"],["Açıklamayı dinlemek","A"],["Uygulamalı örnek çözmek","K"],["Kendi notumu çıkarmak","R"],["Kısa konu özeti video","S"]]},
+    { t:"Fen dersinde anlatım tercihin?",
+      a:[["Deney adımlarının çizimi","V"],["Öğretmeni dikkatle dinlemek","A"],["Laboratuvarda deney yapmak","K"],["Defterde özetlemek","R"],["Deney videosu izlemek","S"]]},
+    { t:"Tarih çalışırken seni ne hızlandırır?",
+      a:[["Zaman çizelgesi","V"],["Sohbetle tartışma","A"],["Harita/nesne üzerinde göstermek","K"],["Kronolojik not","R"],["Belgesel parçası","S"]]},
+    { t:"Matematikte yeni kavram…",
+      a:[["Görsel model","V"],["Sözlü anlatım","A"],["Somut materyal denemek","K"],["Formül defteri","R"],["Kısa özet video","S"]]},
+    { t:"Dil öğrenirken…",
+      a:[["Resimli kartlar","V"],["Dinleme–tekrar","A"],["Diyalog canlandırma","K"],["Kelime defteri","R"],["Kısa diyalog videosu","S"]]},
+    { t:"Coğrafyada…",
+      a:[["Harita/şema","V"],["Ders anlatımı","A"],["Maketi incelemek","K"],["Özet çıkarma","R"],["Belgesel kesiti","S"]]},
+    { t:"Türkçe paragrafa yaklaşımın?",
+      a:[["Şematik özet","V"],["Sesli okuma","A"],["Drama/oyunlaştırma","K"],["Altını çizerek okuma","R"],["Özet video","S"]]},
+    { t:"Kodlama öğrenirken…",
+      a:[["Akış diyagramı","V"],["Adım adım anlatım","A"],["Hemen deneyip görmek","K"],["Adım listesini yazmak","R"],["Kısa demo video","S"]]},
+    { t:"Sınav kampında…",
+      a:[["Konu haritası","V"],["Soru çözümü dinlemek","A"],["Zamanlı deneme","K"],["Plan–takvim","R"],["Gün sonu özet videosu","S"]]},
+    { t:"Motivasyon için…",
+      a:[["Renkli hedef panosu","V"],["Koçla konuşmak","A"],["Kısa spor–mola","K"],["Yapılacaklar listesi","R"],["İlham videosu","S"]]}
+  ],
+  lise: [
+    { t:"Yeni bir kavramı en hızlı nasıl anlarsın?",
+      a:[["Görsel şema/örneklerle","V"],["Konu anlatımını dinleyerek","A"],["Uygulama/problem çözerek","K"],["Not alıp özetleyerek","R"],["Kısa derleme video ile","S"]]},
+    { t:"Fizikte formül öğrenirken…",
+      a:[["Grafik/vektör diyagramı","V"],["Sözlü açıklama","A"],["Deney/simülasyon","K"],["Tümdengelimsel not","R"],["Simülasyon videosu","S"]]},
+    { t:"Kimya tepkimeleri…",
+      a:[["Şematik tablo","V"],["Ders anlatımı","A"],["Lab deneyi","K"],["Tepkime notları","R"],["Deney videosu","S"]]},
+    { t:"Matematikte limit/ türev…",
+      a:[["Grafik üzerinden","V"],["Teoriyi dinleyerek","A"],["Soru üzerinde deneme","K"],["Tanım–teorem yazmak","R"],["Kısa konu özeti video","S"]]},
+    { t:"Biyoloji sistemleri…",
+      a:[["Organ şemaları","V"],["Anlatım dinlemek","A"],["Modelleme","K"],["Kavram haritası yazmak","R"],["Mikro video","S"]]},
+    { t:"Edebiyat akımları…",
+      a:[["Zihin haritası","V"],["Sohbet anlatım","A"],["Rol canlandırma","K"],["Karşılaştırmalı not","R"],["Özet video","S"]]},
+    { t:"Geometri çalışırken…",
+      a:[["Çizim–görsel","V"],["Çözüm anlatımını dinleme","A"],["Dinamik geometri ile deneme","K"],["Formül kartları","R"],["Kısa çözüm videoları","S"]]},
+    { t:"Programlama öğrenirken…",
+      a:[["Akış diyagramı","V"],["Mentor anlatımı","A"],["Kod yazarak deneme","K"],["Pseudo-code","R"],["Walkthrough video","S"]]},
+    { t:"Plan–disiplin…",
+      a:[["Gantt/kanban görseli","V"],["Koç konuşması","A"],["Zaman kutulama","K"],["Takvim–to-do","R"],["Gün sonu rapor video","S"]]},
+    { t:"Sınav strateji…",
+      a:[["Hata defteri görselleştirme","V"],["Soru çözümü dinleme","A"],["Deneme analizi–deneyim","K"],["Özet–formül defteri","R"],["Teknik video","S"]]}
+  ],
+  universite: [
+    { t:"Akademik bir konuyu çalışırken en verimli yolun?",
+      a:[["Şekil/tabloları incelemek","V"],["Seminer/lecture dinlemek","A"],["Prototip/uygulama yapmak","K"],["Özet–not çıkarmak","R"],["Kısa konferans videosu izlemek","S"]]},
+    { t:"Algoritma öğrenirken…",
+      a:[["Akış şeması/görselleştirme","V"],["Ders anlatımı","A"],["Kodlayıp benchmark denemek","K"],["Matematiksel not/pseudo","R"],["Lecture snippet","S"]]},
+    { t:"İstatistik/olasılık çalışırken…",
+      a:[["Grafik–dağılım görselleri","V"],["Teori anlatımını dinlemek","A"],["R/Python ile deney","K"],["Formül–özet yazmak","R"],["Explainer video","S"]]},
+    { t:"Mühendislik tasarımında…",
+      a:[["CAD/şema","V"],["Sözlü review/feedback","A"],["Prototipleme","K"],["Specification yazmak","R"],["Demo video","S"]]},
+    { t:"Akademik İngilizce…",
+      a:[["Vocab mind-map","V"],["Podcast/lecture dinlemek","A"],["Speaking pratiği","K"],["Akademik notlar","R"],["Short lecture video","S"]]},
+    { t:"Sunum hazırlarken…",
+      a:[["Slide görselleştirme","V"],["Prova–sesli tekrar","A"],["Dry-run","K"],["Script yazmak","R"],["Örnek sunum izlemek","S"]]},
+    { t:"Araştırma planı yaparken…",
+      a:[["Roadmap/diyagram","V"],["Danışman görüşmesi","A"],["Küçük deneyler","K"],["Plan dokümanı","R"],["Seminar video","S"]]},
+    { t:"Veri bilimi öğrenirken…",
+      a:[["Pipeline diyagramı","V"],["Anlatım dinlemek","A"],["Notebook ile denemek","K"],["Notebook notları","R"],["Walkthrough video","S"]]},
+    { t:"Zaman yönetimi…",
+      a:[["Kanban–Gantt","V"],["Koç/mentor görüşmesi","A"],["Pomodoro disiplini","K"],["Takvim–OKR notları","R"],["Productivity talks","S"]]},
+    { t:"Motivasyonunu nasıl diri tutarsın?",
+      a:[["Görsel hedef panosu","V"],["Koç/peer feedback","A"],["Kısa spor–mola","K"],["Günlük yapılacaklar","R"],["İlham konuşmaları","S"]]}
+  ]
+};
+
+/* ========== 2) Etiketler / açıklamalar / ipuçları ========== */
+const LABELS = { V:"Görsel", A:"İşitsel", K:"Yaparak", R:"Yazarak", S:"İzleyerek" };
+const EXPLAINS = {
+  V:"Resimler, renkler ve şekiller sana güç verir. Şema ve çizimlerle çok hızlı öğrenirsin.",
+  A:"Konuşarak ve dinleyerek daha iyi öğrenirsin. Anlatınca aklında kalır.",
+  K:"Hareket ederek, deneyip yaparak öğrenirsin. Ellerini kullanınca konu canlanır.",
+  R:"Yazarak ve okuyarak iyi öğrenirsin. Temiz notlar senin süper gücün.",
+  S:"Kısa videolar ve hikâyeler hoşuna gider. İzleyince konuyu hemen yakalarsın."
+};
+const TIPS = {
+  V:["Konu özetini renklerle şemalaştır.","Kartlara küçük çizimler ekle.","Videoda önemli kareyi dondur."],
+  A:["Konuyu yüksek sesle anlat.","Ses kaydı al, geri dinle.","Arkadaşınla soru-cevap yap."],
+  K:["Kısa deneyler yap.","25 dk çalış + 5 dk hareketli mola.","Somut nesneler kullan."],
+  R:["Kısa özet listeleri yaz.","Başlıkları kalın yap.","Okuduğunu kendi cümlenle yaz."],
+  S:["1-2 dakikalık videolarla başla.","3 kelimeyle not al.","Gerekirse 1.25x hız dene."]
+};
+
+/* ========== 3) DOM referansları ve durum ========== */
+const $ = s => document.querySelector(s);
+const ops = $("#ops"), qText=$("#qText"), step=$("#step"),
+      progBar=$("#progBar"), progressHint=$("#progressHint"),
+      prevBtn=$("#prev"), nextBtn=$("#next"), finishBtn=$("#finish"),
+      err=$("#err"), resultBox=$("#resultBox"), resultTitle=$("#resultTitle"),
+      badges=$("#badges"), resultExplain=$("#resultExplain"), tipsEl=$("#tips"),
+      restart=$("#restart"), ctaBtn=$("#ctaBtn"),
+      levelOverlay = document.getElementById('levelSelect');
+
+let QUESTIONS = [];
+let idx = 0;
+let answers = [];
+const score = {V:0,A:0,K:0,R:0,S:0};
+
+/* ========== 4) Render ========== */
+function render(){
+  if (QUESTIONS.length === 0) {
+    qText.textContent = "";
+    ops.innerHTML = "";
+    progressHint.textContent = "";
+    progBar.style.width = "0%";
+    nextBtn.disabled = true; finishBtn.disabled = true; prevBtn.disabled = true;
+    return;
+  }
+  nextBtn.disabled = false; finishBtn.disabled = false; prevBtn.disabled = false;
+
+  const percent = Math.round((idx)/QUESTIONS.length*100);
+  progBar.style.width = percent + "%";
+  progressHint.textContent = `${idx+1}/${QUESTIONS.length}`;
+
+  prevBtn.disabled = idx===0;
+  nextBtn.style.display = (idx < QUESTIONS.length-1) ? "inline-block" : "none";
+  finishBtn.style.display = (idx === QUESTIONS.length-1) ? "inline-block" : "none";
+
+  const q = QUESTIONS[idx];
+  step.textContent = `Soru ${idx+1} / ${QUESTIONS.length}`;
+  qText.textContent = q.t;
+
+  ops.innerHTML = "";
+  q.a.forEach(([label,type],i)=>{
+    const b = document.createElement("button");
+    b.className = "op"; b.type = "button"; b.textContent = label;
+    if(answers[idx]?.type === type) b.classList.add("sel");
+    b.onclick = ()=>{
+      answers[idx] = {i,type};
+      [...ops.children].forEach(x=>x.classList.remove("sel"));
+      b.classList.add("sel");
+      err.style.display = "none";
+    };
+    ops.appendChild(b);
+  });
+}
+function requireAnswer(){ if(!answers[idx]){ err.style.display="block"; return false; } return true; }
+
+/* ========== 5) Navigation ========== */
+prevBtn.onclick = ()=>{ if(idx>0){ idx--; err.style.display="none"; render(); } };
+nextBtn.onclick = ()=>{ if(!requireAnswer()) return; if(idx<QUESTIONS.length-1){ idx++; render(); } };
+finishBtn.onclick = ()=>{
+  progBar.style.width = "100%";
+  progressHint.textContent = `${QUESTIONS.length}/${QUESTIONS.length}`;
+  if(!requireAnswer()) return;
+
+  for(const k in score) score[k]=0;
+  answers.forEach(a=> score[a.type]++);
+  const ordered = Object.entries(score).sort((a,b)=>b[1]-a[1]);
+  const [topType] = ordered[0];
+
+  badges.innerHTML = ordered.map(([t,v])=>`<span class="pill">${LABELS[t]}: ${v}</span>`).join(" ");
+  resultTitle.textContent = `Harika! Baskın öğrenme biçimin: ${LABELS[topType]} 🎯`;
+  resultExplain.textContent = EXPLAINS[topType];
+  tipsEl.innerHTML = `<strong>İşe yarar ipuçları:</strong><ul>${TIPS[topType].map(x=>`<li>${x}</li>`).join("")}</ul>`;
+
+  resultBox.style.display = "block";
+  $("#quiz .qbox").style.display = "none";
+  $(".bar").style.display = "none";
+
+  ctaBtn.onclick = ()=> location.href = "index.html#pricing";
+
+  /* ==== ANALİZİ TETİKLE (tam burada!) ==== */
+
+  // 1) Analizin basacağı kök
+  const rr = document.createElement('div');
+  rr.id = 'result-root';
+  resultBox.appendChild(rr);
+
+  // 2) ch.level + ch.testResults
+  const levelFromYou = localStorage.getItem('hocamLevel') || 'lise';
+  const finalAnswerCodes = answers.map(a => a?.type).filter(Boolean);
+  localStorage.setItem('ch.level', levelFromYou);
+  localStorage.setItem('ch.testResults', JSON.stringify(finalAnswerCodes));
+
+  // 3) analysis.js'i sıcak yükle (cache-bust)
+  (function(){
+    const old = document.querySelector('script[data-ch-analysis]');
+    if (old) old.remove();
+    const s = document.createElement('script');
+    s.src = 'assets/js/analysis.js?v=' + Date.now();
+    s.setAttribute('data-ch-analysis','1');
+    document.body.appendChild(s);
+  })();
+};
+
+restart.onclick = ()=>{
+  idx = 0; answers = Array(QUESTIONS.length).fill(null);
+  for(const k in score) score[k]=0;
+  $("#quiz .qbox").style.display = "block";
+  $(".bar").style.display = "flex";
+  resultBox.style.display = "none";
+  resultBox.innerHTML = `
+    <h2 id="resultTitle"></h2>
+    <div id="badges" style="margin-bottom:6px"></div>
+    <p class="muted" id="resultExplain"></p>
+    <div class="tips" id="tips"></div>
+    <div class="cta-wrap"><button class="cta" id="ctaBtn">🚀 Hadi başlayalım</button></div>
+    <div class="btn-row">
+      <button class="btn btn-outline" id="restart">↻ Baştan Yap</button>
+      <button class="btn btn-ghost" id="changeLevel">🎓 Seviyeyi Değiştir</button>
+    </div>`;
+  // referansları tazele
+  window.location.reload(); // en temiz reset
+};
+
+/* ========== 6) Seviye seçimi ========== */
+document.querySelectorAll('.level-options button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const level = btn.dataset.level;
+    localStorage.setItem('hocamLevel', level);
+    startTest(level);
+    levelOverlay.style.display = 'none';
+  });
+});
+function startTest(level){
+  QUESTIONS = LEVEL_QUESTIONS[level] || LEVEL_QUESTIONS.ilkokul;
+  idx = 0;
+  answers = Array(QUESTIONS.length).fill(null);
+  render();
+}
+
+/* ========== 7) Otomatik başlat (kayıt varsa) ========== */
+const savedLevel = localStorage.getItem('hocamLevel');
+if (savedLevel) {
+  levelOverlay.style.display = 'none';
+  startTest(savedLevel);
+} else {
+  render();
+}
+
+/* ========== 8) Kısayollar ========== */
+document.addEventListener("keydown",(e)=>{
+  if(e.key>="1" && e.key<="5"){ const i=Number(e.key)-1; ops.children[i]?.click(); }
+  else if(e.key==="ArrowRight"){ nextBtn.click(); }
+  else if(e.key==="ArrowLeft"){ prevBtn.click(); }
+});
+
+/* ========== 9) Seviyeyi değiştir ========== */
+document.getElementById('changeLevel').addEventListener('click', ()=>{
+  localStorage.removeItem('hocamLevel');
+  resultBox.style.display = "none";
+  $("#quiz .qbox").style.display = "block";
+  $(".bar").style.display = "flex";
+  QUESTIONS = [];
+  render();
+  levelOverlay.style.display = 'flex';
+});
+</script>
+
+<!-- analysis.js her zaman yüklensin; veri yoksa kendisi çıkıyor -->
+<script src="assets/js/analysis.js"></script>
+</body>
+</html>

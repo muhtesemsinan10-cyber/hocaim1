@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="tr">
+<head>
+    <link rel="stylesheet" href="style.css">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>İyi Geceler — HocAlm</title>
+<style>
+  body{margin:0;height:100vh;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 20%,#111827 0,#0b1220 60%);color:#fff;font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+  .box{text-align:center}
+  .stars{position:fixed;inset:0;pointer-events:none}
+  .star{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;opacity:.7;animation:twinkle 2.4s infinite ease-in-out}
+  @keyframes twinkle{0%,100%{opacity:.2;transform:scale(1)}50%{opacity:1;transform:scale(1.6)}}
+  .btn{display:inline-flex;gap:8px;padding:10px 14px;border-radius:12px;border:1.5px solid #fff;color:#111827;background:#fff;font-weight:800;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="stars">
+  <div class="star" style="top:10%;left:20%;animation-delay:.1s"></div>
+  <div class="star" style="top:30%;left:70%;animation-delay:.6s"></div>
+  <div class="star" style="top:60%;left:40%;animation-delay:.3s"></div>
+  <div class="star" style="top:80%;left:15%;animation-delay:1s"></div>
+</div>
+<div class="box">
+  <h1>🌙 Bugün beynine yatırım yaptın.</h1>
+  <p>Yarın, bugünkü senin sayesinde daha kolay olacak. İyi geceler.</p>
+  <a class="btn" href="dashboard.html">Ana panele dön</a>
+</div>
+</body>
+</html>
