@@ -1,34 +1,27 @@
 import OpenAI from "openai";
-import express from "express";
-import dotenv from "dotenv";
 
-dotenv.config();
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Only POST allowed" });
+  }
 
-const app = express();
-app.use(express.json());
-
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-app.post("/api/chat", async (req, res) => {
   try {
-    const { message } = req.body;
+    const { message = "Merhaba!" } = req.body || {};
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-    const response = await client.chat.completions.create({
+    const resp = await client.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         { role: "system", content: "Sen Canım HocAIm’sin. Öğrencinin seviyesine göre motive edici, sade ve samimi şekilde anlatırsın." },
-        { role: "user", content: message },
+        { role: "user", content: message }
       ],
+      temperature: 0.7
     });
 
-    const answer = response.choices[0].message.content;
-    res.json({ reply: answer });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Bir hata oluştu." });
+    const answer = resp.choices?.[0]?.message?.content ?? "";
+    return res.status(200).json({ reply: answer });
+  } catch (err) {
+    console.error("chat error:", err);
+    return res.status(500).json({ error: "OpenAI request failed", details: err?.message });
   }
-});
-
-export default app;
+}
