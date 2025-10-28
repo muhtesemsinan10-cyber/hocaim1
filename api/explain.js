@@ -1,39 +1,66 @@
+// /api/explain.js
 import OpenAI from "openai";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    res.status(405).json({ ok: false, error: "Only POST" });
+    res.status(405).send("Method Not Allowed");
     return;
   }
 
   try {
-    const { prompt, topic, question, style, level, context } = req.body || {};
-    const finalPrompt = prompt || `
-Konu: ${topic || '-'}
-Soru: ${question || '-'}
-Seviye: ${level || '-'}
-Stil: ${style || '-'}
-Bağlam: ${context || '-'}
-Tek bir öğrenme stiline uygun, kısa, anlaşılır ve motive edici açıkla. Gerektiğinde 3 maddelik mini özet ver.
-`;
+    const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+    const { prompt, topic, style, level, stream } = body || {};
 
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    const c = await client.chat.completions.create({
+
+    const system = {
+      role: "system",
+      content:
+        "Sen 'HocAIm'sin. Türkçe konuşan, seviyeyi dikkate alan, sabırlı ve motive edici bir öğretmensin. " +
+        "Gereksiz süsleme yapma; açık, adım adım anlat. Öğrenci anlamazsa farklı yollar dener, örnek verirsin."
+    };
+
+    const user = {
+      role: "user",
+      content:
+        `KONU: ${topic || "Genel"}\n` +
+        `ÖĞRENCİ SEVİYESİ: ${level || "Lise"}\n` +
+        `ÖĞRENME STİLİ: ${style || "Otomatik"}\n\n` +
+        (prompt || "Konuya uygun kısa bir giriş yap.")
+    };
+
+    // STREAM yolu
+    if (stream === true || stream === "true" || stream === 1 || stream === "1") {
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      res.setHeader("Cache-Control", "no-cache, no-transform");
+      res.setHeader("Transfer-Encoding", "chunked");
+
+      const completion = await client.chat.completions.create({
+        model: "gpt-4o-mini",
+        temperature: 0.4,
+        stream: true,
+        messages: [system, user],
+      });
+
+      for await (const part of completion) {
+        const token = part.choices?.[0]?.delta?.content || "";
+        if (token) res.write(token);
+      }
+      res.end();
+      return;
+    }
+
+    // Fallback (tek seferde düz metin)
+    const completion = await client.chat.completions.create({
       model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: "Sen 'Canım HocAIm'sın. Yalnızca verilen stile göre konuş, başka stil başlığı verme. Türkçe yanıt ver." },
-        { role: "user", content: finalPrompt }
-      ],
-      temperature: 0.7
+      temperature: 0.4,
+      messages: [system, user],
     });
-
-    let text = c?.choices?.[0]?.message?.content || "—";
-    // Stil başlığı gibi şeyleri temizle:
-    text = text.replace(/^#+\s*(Görsel|İşitsel|Okuma[- ]Yazma|Kinestetik).*$/gim, "").replace(/\n{3,}/g, "\n\n").trim();
-
-    res.status(200).json({ ok: true, html: text, provider: "openai" });
-  } catch (e) {
-    console.error("explain error:", e);
-    res.status(500).json({ ok: false, error: String(e) });
+    const answer = completion.choices?.[0]?.message?.content?.trim() || "";
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+    res.status(200).send(answer);
+  } catch (err) {
+    console.error("EXPLAIN ERROR:", err);
+    try { res.status(500).send("Bir hata oluştu."); } catch {}
   }
 }
