@@ -117,7 +117,7 @@
   </div>
 
   <script>
-    /* ====== Kısa yardımcılar ====== */
+    /* ========= Kısa yardımcılar ========= */
     const $ = s => document.querySelector(s);
     const messages = $('#messages');
     const textarea = $('#composerInput');
@@ -148,23 +148,136 @@
       }
     }
 
-    /* ====== Konu durumu ====== */
+    /* ========= Topic çıkarımı — ölçeklenebilir ========= */
+
+    // Kanonik kütüphane (kısa; büyütülebilir)
+    const TOPIC_LIB = {
+      // majör alanlar (geniş)
+      "Fizik":      ["fizik","mekanik","kuvvet","hareket","enerji","optik","dalga","dalgalar","elektrik","manyetizma","ısı","sıcaklık"],
+      "Matematik":  ["matematik","mat","geometri","cebir","analiz","fonksiyon","limit","türev","integral"],
+      "Kimya":      ["kimya","molekül","reaksiyon","asit","baz","tuz","periyodik","element"],
+      "Biyoloji":   ["biyoloji","hücre","canlı","dna","protein","ekoloji","metabolizma"],
+      "Türkçe":     ["türkçe","dil bilgisi","paragraf","sözcük","cümle","anlam"],
+
+      // sık alt konular (gerektikçe ekle)
+      "Termodinamik": ["termodinamik","ısı bilimi"],
+      "Frekans":      ["frekans","hertz","hz"],
+      "Optik":        ["optik","yansıma","kırılma","mercek","ayna"],
+      "Limit":        ["limit"],
+      "Türev":        ["türev"],
+      "İntegral":     ["integral","alan hesabı"]
+    };
+
+    // Kullanıcıdan öğrenilen konular (yerel)
+    const LIB_KEY = "hocaim.topic_lib";
+    let USER_TOPICS = {};
+    try { USER_TOPICS = JSON.parse(localStorage.getItem(LIB_KEY) || "{}"); } catch {}
+    function saveUserTopic(term){
+      if (!term) return;
+      if (!USER_TOPICS[term]) {
+        USER_TOPICS[term] = [term.toLowerCase()];
+        localStorage.setItem(LIB_KEY, JSON.stringify(USER_TOPICS));
+      }
+    }
+
+    const norm = s => (s||"")
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+      .replace(/[^\p{L}\p{N}\s\.]/gu," ")
+      .replace(/\s+/g," ")
+      .trim();
+
+    function titleCase(s){
+      return s.replace(/\w\S*/g, t => t.charAt(0).toUpperCase()+t.slice(1).toLowerCase());
+    }
+
+    function firstQuoted(text){
+      const m = text.match(/[“”"']([^“”"']{2,80})[“”"']/);
+      return m ? m[1].trim() : null;
+    }
+
+    function matchFromLibrary(text){
+      const s = norm(text);
+
+      // önce kullanıcı sözlüğü
+      for (const k of Object.keys(USER_TOPICS)) {
+        for (const token of USER_TOPICS[k]||[]) {
+          if (s.includes(token)) return k;
+        }
+      }
+      // majör alanlar
+      const majors = ["Fizik","Matematik","Kimya","Biyoloji","Türkçe"];
+      for (const k of majors) {
+        for (const token of TOPIC_LIB[k]||[]) {
+          if (s.includes(norm(token))) return k;
+        }
+      }
+      // diğer tüm başlıklar
+      for (const k of Object.keys(TOPIC_LIB)) {
+        for (const token of TOPIC_LIB[k]) {
+          if (s.includes(norm(token))) return k;
+        }
+      }
+      return null;
+    }
+
+    function inferTopic(userText){
+      const raw = userText || "";
+      const s = norm(raw);
+
+      // 1) "konu: x" / tırnak içi / "x nedir"
+      const k = s.match(/\bkonu[:=]\s*([^\n]{2,60})/i);
+      if (k?.[1]) return titleCase(k[1].trim());
+      const quoted = firstQuoted(raw);
+      if (quoted) return titleCase(quoted);
+      const nedir = s.match(/(.{2,60})\s+nedir\??$/i);
+      if (nedir?.[1]) return titleCase(nedir[1].trim());
+
+      // 2) sınıf + branş (4. sınıf fizik)
+      const sb = s.match(/\b(\d+)\.*\s*s[ıi]n[ıi]f\s+(fizik|mat(ematik)?|kimya|biyoloji|t[üu]rk[çc]e)/);
+      if (sb?.[2]) {
+        const map = { "fizik":"Fizik","mat":"Matematik","matematik":"Matematik","kimya":"Kimya","biyoloji":"Biyoloji","türkçe":"Türkçe","turkce":"Türkçe" };
+        return map[norm(sb[2])] || titleCase(sb[2]);
+      }
+
+      // 3) kütüphane eşleşmesi
+      const libHit = matchFromLibrary(s);
+      if (libHit) return libHit;
+
+      // 4) son kelime(ler)
+      const tail = s.split(/\s+/).slice(-3).join(" ");
+      if (tail && tail.length>=3) return titleCase(tail);
+
+      return null;
+    }
+
+    // “Yapışkan” mantık: geniş -> dar
+    function isNarrower(candidate, current){
+      if (!current) return true;
+      const majors = ["Fizik","Matematik","Kimya","Biyoloji","Türkçe"];
+      return majors.includes(current) && candidate && candidate !== current;
+    }
+
+    /* ========= Konu durumu ========= */
     const state = { topic:null, style:'Otomatik' };
     $('#kvStyle').textContent = 'Otomatik';
+
     function setTopic(t){
       state.topic = t;
       $('#kvTopic').textContent = t || '—';
       $('#title').textContent = t ? `“${t}” konusunu öğrenelim` : 'Ders';
       const c = getActive(); if (c){ c.title = t || 'Sohbet'; save(); renderConvos(); }
     }
-    function inferTopic(text=''){
-      const m = text.toLowerCase();
-      const pairs = [[/frekans/,'Frekans'],[/limit/,'Limit'],[/integral/,'İntegral'],[/türev/,'Türev'],[/term[oö]dinamik/,'Termodinamik']];
-      for(const [re,name] of pairs){ if(re.test(m)) return name; }
-      return null;
+
+    function maybeUpdateTopic(candidate){
+      if (!candidate) return;
+      if (!state.topic || isNarrower(candidate, state.topic)) {
+        setTopic(candidate);
+        saveUserTopic(candidate);
+      }
     }
 
-    /* ====== LocalStorage sohbet yönetimi ====== */
+    /* ========= LocalStorage sohbet yönetimi ========= */
     const STORE="hocaim.convos";
     let convos = JSON.parse(localStorage.getItem(STORE) || "[]");
     let activeId = convos[0]?.id || null;
@@ -213,16 +326,15 @@
       pushTurn('assistant', b.innerHTML);
     };
 
-    /* ====== Streaming explain (message + topic + history) ====== */
+    /* ========= Streaming explain (yalnızca KULLANICI METNİNE göre topic) ========= */
     async function askExplain(message, topic){
-      // Kullanıcı mesajını çiz ve kaydet
       { const b=appendRow('user'); b.innerHTML = message; pushTurn('user', message); }
 
       const ai = appendRow('ai'); ai.classList.add('typing');
       controller = new AbortController();
 
       try{
-        const history = (getActive()?.turns || []).slice(-8); // kısa geçmiş
+        const history = (getActive()?.turns || []).slice(-8);
         const res = await fetch('/api/explain', {
           method:'POST',
           headers:{'Content-Type':'application/json'},
@@ -238,7 +350,6 @@
 
         const ct = (res.headers.get('content-type') || '').toLowerCase();
 
-        // JSON fallback (meta-soru kısa cevap vb.)
         if (ct.includes('application/json')){
           const data = await res.json();
           const html = data.html || data.text || JSON.stringify(data);
@@ -246,12 +357,15 @@
           ai.innerHTML = html;
           pushTurn('assistant', html);
           pct = Math.min(100, pct+10); setProgress();
-          if(!state.topic){ const m=inferTopic(html); if(m) setTopic(m); }
           return;
         }
 
-        // text/plain stream
-        if (!res.body){ ai.classList.remove('typing'); ai.textContent = await res.text(); pushTurn('assistant', ai.textContent); return; }
+        if (!res.body){
+          ai.classList.remove('typing');
+          ai.textContent = await res.text();
+          pushTurn('assistant', ai.textContent);
+          return;
+        }
 
         const reader = res.body.getReader();
         const dec = new TextDecoder();
@@ -266,16 +380,18 @@
         ai.classList.remove('typing');
         pushTurn('assistant', buf);
         pct = Math.min(100, pct+10); setProgress();
-        if(!state.topic){ const m=inferTopic(buf); if(m) setTopic(m); }
       }catch(err){
         ai.classList.remove('typing');
         ai.textContent = 'Bağlantı kesildi.';
       }finally{ controller=null; }
     }
 
-    /* ====== Aksiyonlar ====== */
+    /* ========= Aksiyonlar ========= */
     function runAction(prompt){
-      if(!state.topic){ const ai=appendRow('ai'); ai.innerHTML='Önce bir konu yazmalısın 🙂'; pushTurn('assistant', ai.innerHTML); return; }
+      if(!state.topic){
+        const ai=appendRow('ai'); ai.innerHTML='Önce bir konu yazmalısın 🙂';
+        pushTurn('assistant', ai.innerHTML); return;
+      }
       const merged = `${prompt}\n\nKonu: ${state.topic}`;
       askExplain(merged, state.topic);
     }
@@ -284,18 +400,22 @@
     $('#actWhy').onclick      = ()=> runAction('Bu kavram neden önemli? 4-6 cümlede açıkla, 1 gerçek hayat örneği ver.');
     $('#actReExplain').onclick= ()=> runAction('Aynı konuyu farklı bir üslupla yeniden açıkla.');
 
-    /* ====== Quiz ====== */
+    /* ========= Quiz ========= */
     $('#btnQuiz').onclick = ()=>{
       const t = state.topic || 'Genel';
       location.href = `quiz.html?topic=${encodeURIComponent(t)}`;
     };
 
-    /* ====== Enter & Gönder & Durdur ====== */
+    /* ========= Enter & Gönder & Durdur ========= */
     sendBtn.onclick = ()=>{
       const val = textarea.value.trim();
       if(!val) return;
       textarea.value = '';
-      if(!state.topic){ const maybe = inferTopic(val); if(maybe) setTopic(maybe); }
+
+      // Konu sadece KULLANICI METNİNDEN çıkarılır + yapışkan (geniş->dar)
+      const candidate = inferTopic(val);
+      maybeUpdateTopic(candidate);
+
       askExplain(val, state.topic);
       textarea.focus();
     };
@@ -304,7 +424,7 @@
     });
     stopBtn.onclick = ()=>{ try{ controller?.abort(); }catch{} };
 
-    /* ====== İlk yükleme ====== */
+    /* ========= İlk yükleme ========= */
     ensureActive(); renderConvos(); loadChat();
     if((getActive()?.turns||[]).length===0){
       const b=appendRow('ai'); b.innerHTML='Selam, ben <strong>HocAIm</strong>! Hangi konuda çalışmak istersin?';
