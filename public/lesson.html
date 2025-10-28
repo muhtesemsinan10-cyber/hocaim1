@@ -7,30 +7,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 
   <style>
-    :root{
-      --bg:#fffdf7; --text:#0b1220; --muted:#475569; --border:#e5e7eb;
-      --blue:#3b82f6; --card:#ffffff;
-    }
+    :root{ --bg:#fffdf7; --text:#0b1220; --muted:#475569; --border:#e5e7eb; --blue:#3b82f6; --card:#ffffff; }
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
-    body{
-      margin:0; background:var(--bg); color:var(--text);
-      font-family:'Montserrat',system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',sans-serif;
-    }
+    body{ margin:0; background:var(--bg); color:var(--text); font-family:'Montserrat',system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',sans-serif; }
 
-    /* Sol panel + sağ chat */
-    .page{ max-width:1200px; margin:auto; padding:16px;
-      display:grid; grid-template-columns:300px 1fr; gap:16px; }
+    .page{ max-width:1200px; margin:auto; padding:16px; display:grid; grid-template-columns:300px 1fr; gap:16px; }
     @media(max-width:880px){ .page{ grid-template-columns:1fr; } }
 
-    .card{ background:var(--card); border:1px solid var(--border);
-      border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,.05); }
+    .card{ background:var(--card); border:1px solid var(--border); border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,.05); }
 
     /* SOL PANEL */
     .side{ padding:16px; }
-    .back{ text-decoration:none; border:1px solid var(--border);
-      border-radius:10px; padding:6px 10px; display:inline-flex;
-      align-items:center; gap:6px; background:#fff; font-weight:600; margin-bottom:10px; }
+    .back{ text-decoration:none; border:1px solid var(--border); border-radius:10px; padding:6px 10px; display:inline-flex; align-items:center; gap:6px; background:#fff; font-weight:600; margin-bottom:10px; }
     .brand{ font-weight:800; font-size:20px; margin-bottom:10px; display:flex; align-items:center; gap:6px; }
     .kv{ border-top:1px solid var(--border); padding-top:8px; margin-top:8px; font-size:14px; }
     .kv .row{ display:flex; justify-content:space-between; margin:4px 0; }
@@ -39,16 +28,13 @@
     .tiny{ font-size:12px; color:var(--muted); }
 
     .actions{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
-    .chipbtn{ border:1px solid var(--border); border-radius:999px;
-      padding:8px 12px; background:#fff; font-weight:700; cursor:pointer; }
+    .chipbtn{ border:1px solid var(--border); border-radius:999px; padding:8px 12px; background:#fff; font-weight:700; cursor:pointer; }
     .chipbtn:active{ transform:translateY(1px); }
 
-    .quiz{ display:flex; align-items:center; gap:8px; border:1px dashed var(--border);
-      padding:10px; border-radius:12px; margin-top:12px; }
+    .quiz{ display:flex; align-items:center; gap:8px; border:1px dashed var(--border); padding:10px; border-radius:12px; margin-top:12px; }
     .convos{ margin-top:14px; }
     .conv-list{ display:flex; flex-direction:column; gap:6px; }
-    .conv{ border:1px solid var(--border); border-radius:10px; background:#fff;
-      padding:8px 10px; font-weight:600; display:flex; justify-content:space-between; cursor:pointer; }
+    .conv{ border:1px solid var(--border); border-radius:10px; background:#fff; padding:8px 10px; font-weight:600; display:flex; justify-content:space-between; cursor:pointer; }
     .conv small{ color:var(--muted); }
 
     /* SAĞ CHAT */
@@ -56,29 +42,17 @@
     .title{ font-size:22px; font-weight:800; margin:0 0 2px; }
     .subtitle{ margin:0 0 10px; color:var(--muted); font-size:13px; }
 
-    .messages{
-      flex:1; overflow:auto; background:#fff; border:1px solid var(--border);
-      border-radius:14px; padding:12px; scroll-behavior:smooth;
-    }
+    .messages{ flex:1; overflow:auto; background:#fff; border:1px solid var(--border); border-radius:14px; padding:12px; scroll-behavior:smooth; }
     .msg{ display:flex; gap:10px; margin:8px 0; max-width:860px; }
-    .bubble{ border:1px solid var(--border); padding:12px 14px; border-radius:14px;
-      line-height:1.5; white-space:pre-wrap; word-break:break-word; }
+    .bubble{ border:1px solid var(--border); padding:12px 14px; border-radius:14px; line-height:1.5; white-space:pre-wrap; word-break:break-word; }
     .msg.user{ justify-content:flex-end; }
     .msg.user .bubble{ background:#0b1220; color:#fff; border-color:#0b1220; }
     .msg.ai .bubble{ background:#fff; }
 
-    .composer{ position:sticky; bottom:0; background:var(--bg);
-      border-top:1px solid var(--border); padding-top:10px; margin-top:10px; }
-    .composer-inner{ display:flex; gap:8px; align-items:center;
-      background:#fff; border:1px solid var(--border);
-      border-radius:12px; padding:8px 10px; }
-    .composer textarea{
-      flex:1; resize:none; border:0; outline:0; background:transparent;
-      max-height:160px; font:inherit;
-    }
-    .btn{ border:none; background:var(--blue); color:#fff;
-      font-weight:800; padding:10px 16px; border-radius:12px; cursor:pointer;
-      box-shadow:0 4px 12px rgba(59,130,246,.25); }
+    .composer{ position:sticky; bottom:0; background:var(--bg); border-top:1px solid var(--border); padding-top:10px; margin-top:10px; }
+    .composer-inner{ display:flex; gap:8px; align-items:center; background:#fff; border:1px solid var(--border); border-radius:12px; padding:8px 10px; }
+    .composer textarea{ flex:1; resize:none; border:0; outline:0; background:transparent; max-height:160px; font:inherit; }
+    .btn{ border:none; background:var(--blue); color:#fff; font-weight:800; padding:10px 16px; border-radius:12px; cursor:pointer; box-shadow:0 4px 12px rgba(59,130,246,.25); }
     .btn.secondary{ background:#f1f5f9; color:#0b1220; border:1px solid var(--border); box-shadow:none; }
     .btn:disabled{ opacity:.6; cursor:not-allowed; }
 
@@ -143,7 +117,7 @@
   </div>
 
   <script>
-    /* ====== Yardımcılar ====== */
+    /* ====== Kısa yardımcılar ====== */
     const $ = s => document.querySelector(s);
     const messages = $('#messages');
     const textarea = $('#composerInput');
@@ -151,86 +125,133 @@
     const stopBtn = $('#stopBtn');
     let controller = null, pct = 0;
 
-    function appendMsg(role, html=''){
+    function scrollToBottom(){ messages.scrollTop = messages.scrollHeight; }
+    function setProgress(){ $('#bar').style.width = pct + '%'; $('#pp').textContent = pct; }
+
+    function appendRow(role){
       const row = document.createElement('div');
       row.className = `msg ${role}`;
       const bubble = document.createElement('div');
       bubble.className = 'bubble';
-      bubble.innerHTML = html;
       row.appendChild(bubble);
       messages.appendChild(row);
-      messages.scrollTop = messages.scrollHeight;
+      scrollToBottom();
       return bubble;
     }
+
     async function typeInto(el, chunk, speed=8){
       for(const ch of chunk){
         const safe = ch==='<'?'&lt;':ch==='>'?'&gt;':ch;
         el.innerHTML += safe;
-        messages.scrollTop = messages.scrollHeight;
+        scrollToBottom();
         if(speed) await new Promise(r=>setTimeout(r,speed));
       }
-    }
-    function setProgress(){
-      document.getElementById('bar').style.width = pct + '%';
-      document.getElementById('pp').textContent = pct;
     }
 
     /* ====== Konu durumu ====== */
     const state = { topic:null, style:'Otomatik' };
-    document.getElementById('kvStyle').textContent = 'Otomatik';
+    $('#kvStyle').textContent = 'Otomatik';
     function setTopic(t){
       state.topic = t;
-      document.getElementById('kvTopic').textContent = t || '—';
-      document.getElementById('title').textContent = t ? `“${t}” konusunu öğrenelim` : 'Ders';
-      // aktif sohbet başlığını da güncelle
+      $('#kvTopic').textContent = t || '—';
+      $('#title').textContent = t ? `“${t}” konusunu öğrenelim` : 'Ders';
       const c = getActive(); if (c){ c.title = t || 'Sohbet'; save(); renderConvos(); }
     }
-    function inferTopic(text){
-      text = (text||'').toLowerCase();
-      const pairs = [
-        [/frekans/,'Frekans'], [/limit/,'Limit'], [/integral/,'İntegral'],
-        [/türev/,'Türev'], [/term[oö]dinamik/,'Termodinamik']
-      ];
-      for(const [re,name] of pairs){ if(re.test(text)) return name; }
+    function inferTopic(text=''){
+      const m = text.toLowerCase();
+      const pairs = [[/frekans/,'Frekans'],[/limit/,'Limit'],[/integral/,'İntegral'],[/türev/,'Türev'],[/term[oö]dinamik/,'Termodinamik']];
+      for(const [re,name] of pairs){ if(re.test(m)) return name; }
       return null;
     }
 
-    /* ====== Streaming explain (JSON fallback’lı) ====== */
+    /* ====== LocalStorage sohbet yönetimi ====== */
+    const STORE="hocaim.convos";
+    let convos = JSON.parse(localStorage.getItem(STORE) || "[]");
+    let activeId = convos[0]?.id || null;
+
+    function save(){ localStorage.setItem(STORE, JSON.stringify(convos)); }
+    function ensureActive(){
+      if(!activeId){
+        const id=Date.now().toString();
+        convos.unshift({id,title:'Yeni sohbet',turns:[]});
+        activeId=id; save();
+      }
+    }
+    function getActive(){ return convos.find(c=>c.id===activeId) || null; }
+    function pushTurn(role, content){
+      const c = getActive(); if(!c) return;
+      c.turns.push({role, content}); save();
+    }
+    function renderConvos(){
+      const list = $('#convList'); list.innerHTML='';
+      convos.forEach(c=>{
+        const div=document.createElement('div');
+        div.className='conv';
+        div.innerHTML=`<span>${c.title||'Sohbet'}</span><small>➜</small>`;
+        div.onclick=()=>{ activeId=c.id; loadChat(); };
+        list.appendChild(div);
+      });
+    }
+    function loadChat(){
+      const c = getActive();
+      messages.innerHTML=''; state.topic=null;
+      if(!c) return;
+      setTopic(c.title!=='Yeni sohbet'?c.title:null);
+      for(const t of c.turns){
+        const b = appendRow(t.role);
+        b.innerHTML = t.content;
+      }
+      scrollToBottom();
+    }
+
+    $('#btnNew').onclick=()=>{
+      const id=Date.now().toString();
+      convos.unshift({id,title:'Yeni sohbet',turns:[]});
+      activeId=id; save(); renderConvos(); loadChat();
+      const b = appendRow('ai');
+      b.innerHTML = 'Selam, ben <strong>HocAIm</strong>! Hangi konuda çalışmak istersin?';
+      pushTurn('assistant', b.innerHTML);
+    };
+
+    /* ====== Streaming explain (message + topic + history) ====== */
     async function askExplain(message, topic){
-      appendMsg('user', message);
-      const aiBubble = appendMsg('ai','');
-      aiBubble.classList.add('typing');
+      // Kullanıcı mesajını çiz ve kaydet
+      { const b=appendRow('user'); b.innerHTML = message; pushTurn('user', message); }
+
+      const ai = appendRow('ai'); ai.classList.add('typing');
       controller = new AbortController();
 
       try{
+        const history = (getActive()?.turns || []).slice(-8); // kısa geçmiş
         const res = await fetch('/api/explain', {
           method:'POST',
           headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ message, topic }),
+          body: JSON.stringify({ message, topic, history }),
           signal: controller.signal
         });
-        if(!res.ok) throw new Error('fetch failed');
+
+        if(!res.ok){
+          ai.classList.remove('typing');
+          ai.textContent = 'Bağlantı kesildi.';
+          return;
+        }
+
         const ct = (res.headers.get('content-type') || '').toLowerCase();
 
-        // JSON dönerse (bazı guard/ilk cevaplar)
-        if (ct.includes('application/json')) {
+        // JSON fallback (meta-soru kısa cevap vb.)
+        if (ct.includes('application/json')){
           const data = await res.json();
           const html = data.html || data.text || JSON.stringify(data);
-          aiBubble.classList.remove('typing');
-          aiBubble.innerHTML = html;
+          ai.classList.remove('typing');
+          ai.innerHTML = html;
+          pushTurn('assistant', html);
           pct = Math.min(100, pct+10); setProgress();
-          if(!state.topic){ const m = inferTopic(html); if(m) setTopic(m); }
+          if(!state.topic){ const m=inferTopic(html); if(m) setTopic(m); }
           return;
         }
 
         // text/plain stream
-        if (!res.body || !ct.includes('text/plain')) {
-          const txt = await res.text();
-          aiBubble.classList.remove('typing');
-          aiBubble.innerHTML = txt;
-          if(!state.topic){ const m = inferTopic(txt); if(m) setTopic(m); }
-          return;
-        }
+        if (!res.body){ ai.classList.remove('typing'); ai.textContent = await res.text(); pushTurn('assistant', ai.textContent); return; }
 
         const reader = res.body.getReader();
         const dec = new TextDecoder();
@@ -240,18 +261,34 @@
           if(done) break;
           const chunk = dec.decode(value,{stream:true});
           buf += chunk;
-          await typeInto(aiBubble, chunk, 8); // uzun cevaplarda 0 yap → anında
+          await typeInto(ai, chunk, 8);
         }
-        aiBubble.classList.remove('typing');
+        ai.classList.remove('typing');
+        pushTurn('assistant', buf);
         pct = Math.min(100, pct+10); setProgress();
-        if(!state.topic){ const m = inferTopic(buf); if(m) setTopic(m); }
+        if(!state.topic){ const m=inferTopic(buf); if(m) setTopic(m); }
       }catch(err){
-        aiBubble.classList.remove('typing');
-        aiBubble.textContent = 'Bağlantı kesildi.';
-      }finally{
-        controller = null;
-      }
+        ai.classList.remove('typing');
+        ai.textContent = 'Bağlantı kesildi.';
+      }finally{ controller=null; }
     }
+
+    /* ====== Aksiyonlar ====== */
+    function runAction(prompt){
+      if(!state.topic){ const ai=appendRow('ai'); ai.innerHTML='Önce bir konu yazmalısın 🙂'; pushTurn('assistant', ai.innerHTML); return; }
+      const merged = `${prompt}\n\nKonu: ${state.topic}`;
+      askExplain(merged, state.topic);
+    }
+    $('#actSimple').onclick   = ()=> runAction('Bu konuyu daha basit, 3 maddede özetle. Küçük ipucu ekle.');
+    $('#actExample').onclick  = ()=> runAction('Bu konu için 2 kolay + 1 orta seviye çözümlü soru üret.');
+    $('#actWhy').onclick      = ()=> runAction('Bu kavram neden önemli? 4-6 cümlede açıkla, 1 gerçek hayat örneği ver.');
+    $('#actReExplain').onclick= ()=> runAction('Aynı konuyu farklı bir üslupla yeniden açıkla.');
+
+    /* ====== Quiz ====== */
+    $('#btnQuiz').onclick = ()=>{
+      const t = state.topic || 'Genel';
+      location.href = `quiz.html?topic=${encodeURIComponent(t)}`;
+    };
 
     /* ====== Enter & Gönder & Durdur ====== */
     sendBtn.onclick = ()=>{
@@ -267,67 +304,11 @@
     });
     stopBtn.onclick = ()=>{ try{ controller?.abort(); }catch{} };
 
-    /* ====== Aksiyon butonları (son konu bağlamlı) ====== */
-    function runAction(prompt){
-      if(!state.topic){ appendMsg('ai','Önce bir konu yazmalısın 🙂'); return; }
-      const merged = `${prompt}\n\nKonu: ${state.topic}`;
-      askExplain(merged, state.topic);
-    }
-    document.getElementById('actSimple').onclick   = ()=> runAction('Bu konuyu daha basit, 3 maddede özetle. Küçük ipucu ekle.');
-    document.getElementById('actExample').onclick  = ()=> runAction('Bu konu için 2 kolay + 1 orta seviye çözümlü soru üret.');
-    document.getElementById('actWhy').onclick      = ()=> runAction('Bu kavram neden önemli? 4-6 cümlede açıkla, 1 gerçek hayat örneği ver.');
-    document.getElementById('actReExplain').onclick= ()=> runAction('Aynı konuyu farklı bir üslupla yeniden açıkla.');
-
-    /* ====== Quiz (güncel topic) ====== */
-    document.getElementById('btnQuiz').onclick = ()=>{
-      const t = state.topic || 'Genel';
-      location.href = `quiz.html?topic=${encodeURIComponent(t)}`;
-    };
-
-    /* ====== Sohbetler (localStorage) + yeni sohbette hoş geldin ====== */
-    const STORE="hocaim.convos";
-    let convos = JSON.parse(localStorage.getItem(STORE) || "[]");
-    let activeId = convos[0]?.id || null;
-
-    function save(){ localStorage.setItem(STORE, JSON.stringify(convos)); }
-    function renderConvos(){
-      const list = document.getElementById('convList'); list.innerHTML='';
-      convos.forEach(c=>{
-        const div=document.createElement('div');
-        div.className='conv';
-        div.innerHTML=`<span>${c.title||'Sohbet'}</span><small>➜</small>`;
-        div.onclick=()=>{ activeId=c.id; loadChat(); };
-        list.appendChild(div);
-      });
-    }
-    function ensureActive(){
-      if(!activeId){
-        const id=Date.now().toString();
-        convos.unshift({id,title:'Yeni sohbet',turns:[]});
-        activeId=id; save();
-      }
-    }
-    function loadChat(){
-      const c = convos.find(x=>x.id===activeId);
-      messages.innerHTML='';
-      state.topic=null;
-      if(!c) return;
-      setTopic(c.title!=='Yeni sohbet'?c.title:null);
-      for(const t of c.turns){ appendMsg(t.role, t.content); }
-    }
-
-    document.getElementById('btnNew').onclick=()=>{
-      const id=Date.now().toString();
-      convos.unshift({id,title:'Yeni sohbet',turns:[]});
-      activeId=id; save(); renderConvos(); loadChat();
-      // yeni sohbette hocaim ilk mesajı atsın
-      appendMsg('ai','Selam, ben <strong>HocAIm</strong>! Hangi konuda çalışmak istersin?');
-    };
-
-    // İlk yükleme
+    /* ====== İlk yükleme ====== */
     ensureActive(); renderConvos(); loadChat();
-    if((convos.find(x=>x.id===activeId)?.turns||[]).length===0){
-      appendMsg('ai','Selam, ben <strong>HocAIm</strong>! Hangi konuda çalışmak istersin?');
+    if((getActive()?.turns||[]).length===0){
+      const b=appendRow('ai'); b.innerHTML='Selam, ben <strong>HocAIm</strong>! Hangi konuda çalışmak istersin?';
+      pushTurn('assistant', b.innerHTML);
     }
   </script>
 </body>
