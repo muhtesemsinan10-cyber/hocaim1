@@ -292,3 +292,158 @@ a:hover{ text-decoration: underline; }
 .hiw-text{ color: var(--muted); margin:0 0 10px; }
 .hiw-list{ margin: 8px auto 0; padding-left: 18px; text-align:left; max-width: 52ch; }
 .hiw-list li{ margin: 6px 0; }
+/* ======================================================
+   📱 MOBİL NAVBAR YAMASI (HocAlm)
+   Bunu style.css'in EN SONUNA ekle
+   HTML: #desktopLinks, #hamburgerBtn(.hamburger), #mobileMenu
+   ====================================================== */
+
+/* Navbar'ı üste sabitle (tüm sayfalarda aynı davranış) */
+.navbar{
+  position: sticky;
+  top: 0;
+  z-index: 1000; /* menü her şeyin üstünde kalsın */
+}
+
+/* Hamburger düğmesi (sadece mobilde görünecek) */
+.hamburger{
+  display: none;                 /* desktop'ta gizli */
+  margin-left: auto;
+  width: 42px; height: 36px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #0b1220;           /* siyah zemin */
+  box-shadow: 0 4px 10px rgba(0,0,0,.08);
+  align-items: center; justify-content: center; gap: 5px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.hamburger span{
+  display: block;
+  width: 18px; height: 2px;
+  background: #fff;              /* beyaz çizgiler */
+  transition: transform .2s ease, opacity .2s ease;
+  position: relative;
+}
+.hamburger span:nth-child(1){ transform: translateY(-6px); }
+.hamburger span:nth-child(3){ transform: translateY( 6px); }
+
+/* Açılınca 'X' animasyonu */
+.hamburger.is-open span:nth-child(1){ transform: rotate(45deg); }
+.hamburger.is-open span:nth-child(2){ opacity: 0; }
+.hamburger.is-open span:nth-child(3){ transform: rotate(-45deg); }
+
+/* Mobil açılır menü */
+.mobile-menu{
+  display: none;
+  position: absolute;
+  left: 0; right: 0;
+  top: 64px;                     /* navbar yüksekliği kadar aşağıda */
+  background: #fff;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 10px 24px rgba(0,0,0,.06);
+  padding: 10px 16px;
+  z-index: 999;
+}
+.mobile-menu a{
+  display: block;
+  padding: 12px 8px;
+  color: var(--text);
+  text-decoration: none;
+  border-radius: 10px;
+}
+.mobile-menu a:hover{ background: #f8fafc; }
+.mobile-menu a.primary{
+  background: var(--blue);
+  color: #fff;
+  text-align: center;
+  margin-top: 8px;
+  box-shadow: 0 4px 10px rgba(59,130,246,.25);
+}
+
+/* Açık durum sınıfı (JS toggle ediyor) */
+.mobile-menu.is-open{ display: block; }
+
+/* ——— KIRILIM: Mobilde desktop linklerini GİZLE, hamburgeri GÖSTER ——— */
+@media (max-width: 820px){
+  #desktopLinks{ display: none !important; }   /* “Planını Seç / Nasıl Çalışır / Giriş / Ücretsiz Başla” gizlensin */
+  .hamburger{ display: inline-flex !important; }
+}
+
+/* Güvenlik payı: 900 altına düşünce de desktop linklerini kapat */
+@media (max-width: 900px){
+  #desktopLinks{ display: none !important; }
+}
+/* Varsayılan: hamburger/mobil menü görünmesin */
+.burger,
+.mobile-menu,
+.menu-overlay { display: none; }
+
+/* Hamburger görünümü */
+.burger{
+  margin-left:auto; width:42px; height:42px;
+  border:1px solid var(--border); border-radius:12px; background:#fff;
+  display:inline-flex; align-items:center; justify-content:center;
+  box-shadow:0 3px 10px rgba(0,0,0,.04); cursor:pointer;
+}
+.burger .burger-bar,
+.burger .burger-bar::before,
+.burger .burger-bar::after{
+  content:""; display:block; width:20px; height:2.5px; background:#0b1220;
+  border-radius:2px; position:relative; transition:.25s ease-in-out;
+}
+.burger .burger-bar::before{ position:absolute; top:-6px; left:0 }
+.burger .burger-bar::after { position:absolute; top: 6px; left:0 }
+.burger.is-open .burger-bar{ background:transparent }
+.burger.is-open .burger-bar::before{ top:0; transform:rotate(45deg) }
+.burger.is-open .burger-bar::after { top:0; transform:rotate(-45deg) }
+
+/* Mobil menü */
+.mobile-menu{
+  position:fixed; left:12px; right:12px; top:64px; background:#fff;
+  border:1px solid var(--border); border-radius:16px;
+  box-shadow:0 18px 40px rgba(0,0,0,.12); padding:12px; z-index:50;
+}
+.mobile-menu a{
+  display:block; padding:12px 14px; border-radius:10px; text-decoration:none;
+  color:#0b1220; font-weight:700;
+}
+.mobile-menu a:hover{ background:#f1f5f9 }
+.mobile-menu a.primary{ background:#3b82f6; color:#fff; text-align:center; }
+
+/* Overlay */
+.menu-overlay{
+  position:fixed; inset:0; background:rgba(0,0,0,.25); backdrop-filter:blur(2px); z-index:40;
+}
+
+/* Sadece mobilde hamburger açık; masaüstünde saklı */
+@media (max-width: 820px){
+  .links{ display:none; }               /* desktop linkleri gizle */
+  .burger{ display:inline-flex; }       /* hamburger göster */
+  .mobile-menu, .menu-overlay{ display:none; }
+  .mobile-menu.is-open{ display:block; }
+  .menu-overlay.is-open{ display:block; }
+}
+/* === NAV sabitleme (mobile) === */
+:root {
+  --navH: 64px; /* desktop yüksekliği */
+}
+
+/* Navbar yüksekliğini bu değişkenle yönetelim */
+.nav { min-height: var(--navH); }
+
+/* Mobilde fixed yap, sayfaya üst boşluk ver */
+@media (max-width: 820px){
+  :root { --navH: 56px; }             /* mobil yükseklik */
+  .navbar{
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+  }
+  body{ padding-top: var(--navH); }    /* içerik zıplamasın */
+}
+
+/* Eğer .mobile-menu için top sabit sayıysa, değişkene bağla: */
+.mobile-menu{ top: var(--navH); }      /* 64px yerine değişken */
